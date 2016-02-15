@@ -1,8 +1,12 @@
-# tablero
-gobstones grid Polymer component (aka: tablero)
+# panels
+gobstones panels Polymer component
 
 npm update
 
 bower update
 
-grunt server# gs-panels
+grunt server
+
+# or 
+
+** ./build **
