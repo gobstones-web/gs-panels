@@ -1,0 +1,51 @@
+<dom-module id="gs-resizeable">
+  <template>
+    <style>
+      #parent {
+        height: 800px;
+        margin: 0;
+        padding: 0;
+        width: 800px;
+      }
+
+      #div1 {
+        position: relative;
+        float: left;
+        height: 100px;
+        width: 100px;
+        background-color: #A2A;
+      }
+
+      #div2 {
+        position: relative;
+        float: left;
+        height: 100px;
+        width: 100px;
+        background-color: #BBB;
+      }
+
+      /*# sourceMappingURL=style.css.map */
+
+    </style>
+
+
+    <div id="parent">
+       <div id="div1"> My Data1 </div> 
+        <div id="div2"> My Data2</div> 
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-resizeable',
+      attached: function() {
+        $('#div1').resizable({
+          handles: 'e, w'
+        });
+        return $('#div1').resize(function() {
+          $('#div2').width($('#parent').width() - $('#div1').width());
+        });
+      }
+    });
+
+  </script>
+</dom-module>

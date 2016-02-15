@@ -1,0 +1,28 @@
+{
+  "name": "gs-panels",
+  "version": "0.0.1",
+  "authors": [
+    "Nazareno Castro <nazarenomartincastro@gmail.com>"
+  ],
+  "description": "Panels manager for resizeable and scalable layout",
+  "main": "dist/index.html",
+  "keywords": [
+    "polymer",
+    "gobstones",
+    "panels"
+  ],
+  "license": "MIT",
+  "homepage": "index.html",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "staging/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~1.9.1",
+    "polymer": "Polymer/polymer#^1.2.0",
+    "jquery-ui": "~1.9.2"
+  }
+}

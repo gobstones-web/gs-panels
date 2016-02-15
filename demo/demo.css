@@ -1,0 +1,34 @@
+body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #b2ebf2;
+}
+
+#panel-manager {
+  width: 800px;
+  height: 300px;
+  background-color: #9c27b0;
+  border-radius: 10px;
+  margin-left: 20%;
+  padding: 10px;
+  font-size: 2em;
+  font-style: italic;
+}
+#panel-manager div {
+  border: #81c784 solid 2px;
+}
+
+#demo-header {
+  text-align: center;
+  background-color: #4db6ac;
+  color: #000000;
+  font-size: 2em;
+}
+#demo-header code {
+  font-size: 1em;
+  font-style: bold;
+}
+
+/*# sourceMappingURL=demo.css.map */

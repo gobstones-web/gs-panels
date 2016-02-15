@@ -9,4 +9,4 @@ grunt server
 
 # or 
 
-** ./build **
+./build
