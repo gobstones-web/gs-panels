@@ -1,9 +1,14 @@
 :host {
-	position: absolute;
-	margin: auto;
-	white-space: nowrap;
+	float: left;
+overflow: visible;
+position: relative;
+z-index: 1000;
+height: 177px;
+width: 100%;
 	
 	::content > div {
 		float: left;
+		border: #81c784 solid 2px;
+		position: relative;
 	}
 }

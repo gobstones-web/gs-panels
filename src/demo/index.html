@@ -23,6 +23,15 @@
 
     <p id="demo-header">An example of <code>&lt;gs-panels&gt;</code>:</p>
 
+    <button id='buttonA' > Add Panel</button>
+    <script>
+      
+    
+    $('#buttonA').click(function() {
+      document.querySelector("#panel-manager").attach();
+    })
+
+    </script>
     <!-- <gs-panels id="pepito">
       <div>sarasa</div>
       <div>sarasa</div>
@@ -30,9 +39,11 @@
       <div>Fourth Child</div>
     </gs-panels> -->
 
-    <gs-panels id="panel-manager"> 
-      <div>sarasa</div>
-      <div>sarasa</div>
+    <gs-panels id="panel-manager">
+      <gs-panels>
+        <div id="div"> sarasa1</div>
+        <div id="div"> sarasa1</div>
+      </gs-panels>
     </gs-panels>
 
   </body>

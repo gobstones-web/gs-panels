@@ -2,12 +2,17 @@
   <template>
     <style>
       :host {
-        position: absolute;
-        margin: auto;
-        white-space: nowrap;
+        float: left;
+        overflow: visible;
+        position: relative;
+        z-index: 1000;
+        height: 177px;
+        width: 100%;
       }
       :host ::content > div {
         float: left;
+        border: #81c784 solid 2px;
+        position: relative;
       }
 
       /*# sourceMappingURL=style.css.map */
@@ -15,21 +20,43 @@
     </style>
 
     <content>
+    	
     </content>
+
   </template>
   <script>
     Polymer({
       is: 'gs-panels',
+      ready: function() {
+        return this.attach = function() {
+          var div;
+          div = document.createElement('div');
+          Polymer.dom(this).appendChild(div);
+          return $(this).on('DOMNodeInserted', function() {
+            return this.distributeChilds();
+          });
+        };
+      },
       attached: function() {
+        return this.distributeChilds();
+      },
+      distributeChilds: function() {
         var arrayInit, directChilds, gsPanelsHeight, gsPanelsWidth, heigthOfEachPanel, mkHorizontalLayout, mkPanel, mkVerticalLayout, widthOfEachPanel;
-        directChilds = [].slice.call(this.children);
+        console.log("distributeChilds_called");
+        directChilds = [].slice.call(Polymer.dom(this).children);
+        console.log(directChilds);
         gsPanelsHeight = $(this).height();
         gsPanelsWidth = $(this).width();
-        heigthOfEachPanel = Math.round(gsPanelsHeight / directChilds.length);
-        widthOfEachPanel = Math.round(gsPanelsWidth / directChilds.length);
-        console.log(gsPanelsWidth);
         console.log(gsPanelsHeight);
+        console.log(gsPanelsWidth);
+        if ((typeof directChilds !== 'undefined') && (directChilds.length > 0)) {
+          console.log(directChilds.length);
+          heigthOfEachPanel = Math.round(gsPanelsHeight / directChilds.length);
+          widthOfEachPanel = Math.round(gsPanelsWidth / directChilds.length);
+        }
         mkPanel = function(panel, width, height) {
+          console.log(width);
+          console.log(height);
           $(panel).outerWidth(width);
           return $(panel).outerHeight(height);
         };
@@ -46,21 +73,30 @@
           for (_i = 0, _len = directChildsWithoutLast.length; _i < _len; _i++) {
             panel = directChildsWithoutLast[_i];
             containerWidth -= panelW;
+            console.log(containerWidth);
+            console.log("containerWidth");
             mkPanel(panel, panelW, panelH);
           }
           return mkPanel(panels.slice(-1)[0], containerWidth, panelH);
         };
         mkHorizontalLayout = function(panels, panelW, panelH, containerHeight) {
           var directChildsWithoutLast, panel, _i, _len;
-          directChildsWithoutLast = arrayInit(panels);
-          for (_i = 0, _len = directChildsWithoutLast.length; _i < _len; _i++) {
-            panel = directChildsWithoutLast[_i];
-            containerHeight -= panelH;
-            mkPanel(panel, panelW, panelH);
+          if (panels.length === 1) {
+            return mkPanel(panels[0], panelW, panelH);
+          } else {
+            directChildsWithoutLast = arrayInit(panels);
+            for (_i = 0, _len = directChildsWithoutLast.length; _i < _len; _i++) {
+              panel = directChildsWithoutLast[_i];
+              containerHeight -= panelH;
+              console.log(containerHeight);
+              mkPanel(panel, panelW, panelH);
+            }
+            return mkPanel(panels.slice(-1)[0], panelW, containerHeight);
           }
-          return mkPanel(panels.slice(-1)[0], panelW, containerHeight);
         };
-        return mkHorizontalLayout(directChilds, gsPanelsWidth, heigthOfEachPanel, gsPanelsHeight);
+        if ((typeof directChilds !== 'undefined') && (directChilds.length > 0)) {
+          return mkHorizontalLayout(directChilds, gsPanelsWidth, heigthOfEachPanel, gsPanelsHeight);
+        }
       }
     });
 

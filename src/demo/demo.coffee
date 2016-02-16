@@ -5,3 +5,4 @@ jQUeryLoaded = () ->
     console.log 'jQuery is not loaded'
 
 jQUeryLoaded()
+

@@ -16,9 +16,6 @@ body {
   font-size: 2em;
   font-style: italic;
 }
-#panel-manager div {
-  border: #81c784 solid 2px;
-}
 
 #demo-header {
   text-align: center;
