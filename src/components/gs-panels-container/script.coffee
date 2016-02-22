@@ -15,24 +15,29 @@ Polymer
         Polymer.dom(Polymer.dom(this).parentNode).removeChild(this)
         this.fire('closePanel', {})
       else
-        removedHeigth = e.detail.offsetWidth
-        porcent = (removedHeigth * 100) / this.offsetWidth
         firstChildrens = Polymer.dom(this).children
-        child.getBoundingClientRect() for child in firstChildrens
+        removedWidth = e.detail.getBoundingClientRect().width
+        console.log removedWidth
+        widthToAddForEachChild = removedWidth / firstChildrens.length
+        console.log widthToAddForEachChild
+        
+        this.addWidth(child, widthToAddForEachChild) for child in firstChildrens
 
     calculateWidth: ()->
       firstChildrens = Polymer.dom(this).children
       (child.offsetWidth for child in firstChildrens).reduce(((a, b)-> a + b) , 0)
       
     attached: ()->
-      this.setWidth(this, this.getWidth(htmlElement))
-    
-    getWidth: (htmlElement)->
-      htmlElement.getBoundingClientRect().width
-    
-    setWidth: (htmlElement, newWidth )->
-      htmlElement.style.width = newWidth  + "px"
+      # Set content width for the first time
+      this.setWidth(this, this.getInnerWidth(this))
 
-    setWithPlusPercent: (htmlElement, percent)->
-      newWidth = this.getWidth(htmlElement) * percent
-      this.setWidth()
+    getInnerWidth: (htmlElement)->
+      style = window.getComputedStyle(htmlElement, null)
+      parseFloat(style.getPropertyValue("width"))
+    
+    setWidth: (htmlElement, newWidth)->
+      htmlElement.style.width = newWidth + "px"
+
+    addWidth: (htmlElement, widthToAdd)->
+      newWidth = this.getInnerWidth(htmlElement) + widthToAdd
+      this.setWidth(htmlElement, newWidth)

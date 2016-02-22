@@ -30,19 +30,21 @@
         'closePanel': '_checkChilds'
       },
       _checkChilds: function(e) {
-        var child, children, firstChildrens, porcent, removedHeigth, _i, _len, _results;
+        var child, children, firstChildrens, removedWidth, widthToAddForEachChild, _i, _len, _results;
         children = Polymer.dom(this).children;
         if (children.length === 0 || children === []) {
           Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
           return this.fire('closePanel', {});
         } else {
-          removedHeigth = e.detail.offsetWidth;
-          porcent = (removedHeigth * 100) / this.offsetWidth;
           firstChildrens = Polymer.dom(this).children;
+          removedWidth = e.detail.getBoundingClientRect().width;
+          console.log(removedWidth);
+          widthToAddForEachChild = removedWidth / firstChildrens.length;
+          console.log(widthToAddForEachChild);
           _results = [];
           for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
             child = firstChildrens[_i];
-            _results.push(child.getBoundingClientRect());
+            _results.push(this.addWidth(child, widthToAddForEachChild));
           }
           return _results;
         }
@@ -63,18 +65,20 @@
         }), 0);
       },
       attached: function() {
-        return this.setWidth(this, this.getWidth(htmlElement));
+        return this.setWidth(this, this.getInnerWidth(this));
       },
-      getWidth: function(htmlElement) {
-        return htmlElement.getBoundingClientRect().width;
+      getInnerWidth: function(htmlElement) {
+        var style;
+        style = window.getComputedStyle(htmlElement, null);
+        return parseFloat(style.getPropertyValue("width"));
       },
       setWidth: function(htmlElement, newWidth) {
         return htmlElement.style.width = newWidth + "px";
       },
-      setWithPlusPercent: function(htmlElement, percent) {
+      addWidth: function(htmlElement, widthToAdd) {
         var newWidth;
-        newWidth = this.getWidth(htmlElement) * percent;
-        return this.setWidth();
+        newWidth = this.getInnerWidth(htmlElement) + widthToAdd;
+        return this.setWidth(htmlElement, newWidth);
       }
     });
 
