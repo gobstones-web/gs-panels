@@ -9,21 +9,15 @@
 
     </style>
 
-    <button on-click="removeElement"> cerrar</button>
+    <button on-click="removePanel"> cerrar</button>
     <content>
     </content>
   </template>
   <script>
     Polymer({
       is: 'gs-panel',
-      listeners: {
-        'iron-resize': 'resize'
-      },
-      resize: function(event) {
-        return alert("Thank you for tapping");
-      },
-      removeElement: function() {
-        console.log("llame a la funcion");
+      removePanel: function() {
+        console.log("Polymer closePanel event fired");
         Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
         return this.fire('closePanel', this);
       }

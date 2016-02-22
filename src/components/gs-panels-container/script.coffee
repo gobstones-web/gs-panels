@@ -2,42 +2,56 @@ Polymer
     is: '#GRUNT_COMPONENT_NAME'
 
     properties: 
+      height:
+        type: String
+        value: "600px"
       orientation:
         type: String
-        value: "Vertical"
+        value: "horizontal"
 
     listeners: 
       'closePanel': '_checkChilds'
 
-    _checkChilds: (e)->
+    attached: ()->
+      # Set content width for the first time
+      if this.orientation == "horizontal"
+        this.setComponent(this, this.getInner(this, "width"), "width")
+        this.style.height = this.height
+      else
+        if this.orientation == "vertical"
+          this.setComponent(this, this.getInner(this, "height"), "height")
+          this.style.width = this.width
+      this._fixLayout()
+    
+    _fixLayout: ()->
+      firstChildrens = Polymer.dom(this).children
+      #Check if children is empty throw exception or do nothing
+      if this.orientation == "horizontal"
+        child.style.height = "100%" for child in firstChildrens
+      else
+        if this.orientation == "vertical"
+          child.style.width = "100%" for child in firstChildrens
+
+    _checkChilds: (eventData)->
       children = Polymer.dom(this).children
       if children.length == 0 or children == []
         Polymer.dom(Polymer.dom(this).parentNode).removeChild(this)
         this.fire('closePanel', {})
       else
         firstChildrens = Polymer.dom(this).children
-        removedWidth = e.detail.getBoundingClientRect().width
-        console.log removedWidth
-        widthToAddForEachChild = removedWidth / firstChildrens.length
-        console.log widthToAddForEachChild
+        removedWidth = eventData.detail.getBoundingClientRect().width
         
-        this.addWidth(child, widthToAddForEachChild) for child in firstChildrens
+        widthToAddForEachChild = removedWidth / firstChildrens.length
+        
+        this.incrementComponent(child, widthToAddForEachChild, "width") for child in firstChildrens
 
-    calculateWidth: ()->
-      firstChildrens = Polymer.dom(this).children
-      (child.offsetWidth for child in firstChildrens).reduce(((a, b)-> a + b) , 0)
-      
-    attached: ()->
-      # Set content width for the first time
-      this.setWidth(this, this.getInnerWidth(this))
-
-    getInnerWidth: (htmlElement)->
+    getInner: (htmlElement, component)->
       style = window.getComputedStyle(htmlElement, null)
-      parseFloat(style.getPropertyValue("width"))
+      parseFloat(style.getPropertyValue(component))
     
-    setWidth: (htmlElement, newWidth)->
-      htmlElement.style.width = newWidth + "px"
-
-    addWidth: (htmlElement, widthToAdd)->
-      newWidth = this.getInnerWidth(htmlElement) + widthToAdd
-      this.setWidth(htmlElement, newWidth)
+    setComponent: (htmlElement, newWidth, component)->
+      htmlElement.style[component] = newWidth + "px"
+    
+    incrementComponent: (htmlElement, toIncrement, component)->
+      newDimension = this.getInner(htmlElement, component) + toIncrement
+      this.setComponent(htmlElement, newDimension, component)

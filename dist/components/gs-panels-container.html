@@ -21,15 +21,52 @@
     Polymer({
       is: 'gs-panels-container',
       properties: {
+        height: {
+          type: String,
+          value: "600px"
+        },
         orientation: {
           type: String,
-          value: "Vertical"
+          value: "horizontal"
         }
       },
       listeners: {
         'closePanel': '_checkChilds'
       },
-      _checkChilds: function(e) {
+      attached: function() {
+        if (this.orientation === "horizontal") {
+          this.setComponent(this, this.getInner(this, "width"), "width");
+          this.style.height = this.height;
+        } else {
+          if (this.orientation === "vertical") {
+            this.setComponent(this, this.getInner(this, "height"), "height");
+            this.style.width = this.width;
+          }
+        }
+        return this._fixLayout();
+      },
+      _fixLayout: function() {
+        var child, firstChildrens, _i, _j, _len, _len1, _results, _results1;
+        firstChildrens = Polymer.dom(this).children;
+        if (this.orientation === "horizontal") {
+          _results = [];
+          for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
+            child = firstChildrens[_i];
+            _results.push(child.style.height = "100%");
+          }
+          return _results;
+        } else {
+          if (this.orientation === "vertical") {
+            _results1 = [];
+            for (_j = 0, _len1 = firstChildrens.length; _j < _len1; _j++) {
+              child = firstChildrens[_j];
+              _results1.push(child.style.width = "100%");
+            }
+            return _results1;
+          }
+        }
+      },
+      _checkChilds: function(eventData) {
         var child, children, firstChildrens, removedWidth, widthToAddForEachChild, _i, _len, _results;
         children = Polymer.dom(this).children;
         if (children.length === 0 || children === []) {
@@ -37,48 +74,28 @@
           return this.fire('closePanel', {});
         } else {
           firstChildrens = Polymer.dom(this).children;
-          removedWidth = e.detail.getBoundingClientRect().width;
-          console.log(removedWidth);
+          removedWidth = eventData.detail.getBoundingClientRect().width;
           widthToAddForEachChild = removedWidth / firstChildrens.length;
-          console.log(widthToAddForEachChild);
           _results = [];
           for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
             child = firstChildrens[_i];
-            _results.push(this.addWidth(child, widthToAddForEachChild));
+            _results.push(this.incrementComponent(child, widthToAddForEachChild, "width"));
           }
           return _results;
         }
       },
-      calculateWidth: function() {
-        var child, firstChildrens;
-        firstChildrens = Polymer.dom(this).children;
-        return ((function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
-            child = firstChildrens[_i];
-            _results.push(child.offsetWidth);
-          }
-          return _results;
-        })()).reduce((function(a, b) {
-          return a + b;
-        }), 0);
-      },
-      attached: function() {
-        return this.setWidth(this, this.getInnerWidth(this));
-      },
-      getInnerWidth: function(htmlElement) {
+      getInner: function(htmlElement, component) {
         var style;
         style = window.getComputedStyle(htmlElement, null);
-        return parseFloat(style.getPropertyValue("width"));
+        return parseFloat(style.getPropertyValue(component));
       },
-      setWidth: function(htmlElement, newWidth) {
-        return htmlElement.style.width = newWidth + "px";
+      setComponent: function(htmlElement, newWidth, component) {
+        return htmlElement.style[component] = newWidth + "px";
       },
-      addWidth: function(htmlElement, widthToAdd) {
-        var newWidth;
-        newWidth = this.getInnerWidth(htmlElement) + widthToAdd;
-        return this.setWidth(htmlElement, newWidth);
+      incrementComponent: function(htmlElement, toIncrement, component) {
+        var newDimension;
+        newDimension = this.getInner(htmlElement, component) + toIncrement;
+        return this.setComponent(htmlElement, newDimension, component);
       }
     });
 
