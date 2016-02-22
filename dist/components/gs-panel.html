@@ -1,0 +1,33 @@
+<dom-module id="gs-panel">
+  <template>
+    <style>
+      :host ::content > div {
+        float: left;
+      }
+
+      /*# sourceMappingURL=style.css.map */
+
+    </style>
+
+    <button on-click="removeElement"> cerrar</button>
+    <content>
+    </content>
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panel',
+      listeners: {
+        'iron-resize': 'resize'
+      },
+      resize: function(event) {
+        return alert("Thank you for tapping");
+      },
+      removeElement: function() {
+        console.log("llame a la funcion");
+        Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
+        return this.fire('closePanel', this);
+      }
+    });
+
+  </script>
+</dom-module>

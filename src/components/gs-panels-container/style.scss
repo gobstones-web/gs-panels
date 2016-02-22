@@ -1,0 +1,8 @@
+:host {
+	display: table;
+	::content > gs-panel {
+		float: left;
+		border:  #000000 solid 3px;
+		margin: 2px;
+	}
+}

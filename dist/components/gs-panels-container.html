@@ -1,0 +1,82 @@
+<dom-module id="gs-panels-container">
+  <template>
+    <style>
+      :host {
+        display: table;
+      }
+      :host ::content > gs-panel {
+        float: left;
+        border: #000000 solid 3px;
+        margin: 2px;
+      }
+
+      /*# sourceMappingURL=style.css.map */
+
+    </style>
+
+    <content></content>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panels-container',
+      properties: {
+        orientation: {
+          type: String,
+          value: "Vertical"
+        }
+      },
+      listeners: {
+        'closePanel': '_checkChilds'
+      },
+      _checkChilds: function(e) {
+        var child, children, firstChildrens, porcent, removedHeigth, _i, _len, _results;
+        children = Polymer.dom(this).children;
+        if (children.length === 0 || children === []) {
+          Polymer.dom(Polymer.dom(this).parentNode).removeChild(this);
+          return this.fire('closePanel', {});
+        } else {
+          removedHeigth = e.detail.offsetWidth;
+          porcent = (removedHeigth * 100) / this.offsetWidth;
+          firstChildrens = Polymer.dom(this).children;
+          _results = [];
+          for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
+            child = firstChildrens[_i];
+            _results.push(child.getBoundingClientRect());
+          }
+          return _results;
+        }
+      },
+      calculateWidth: function() {
+        var child, firstChildrens;
+        firstChildrens = Polymer.dom(this).children;
+        return ((function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = firstChildrens.length; _i < _len; _i++) {
+            child = firstChildrens[_i];
+            _results.push(child.offsetWidth);
+          }
+          return _results;
+        })()).reduce((function(a, b) {
+          return a + b;
+        }), 0);
+      },
+      attached: function() {
+        return this.setWidth(this, this.getWidth(htmlElement));
+      },
+      getWidth: function(htmlElement) {
+        return htmlElement.getBoundingClientRect().width;
+      },
+      setWidth: function(htmlElement, newWidth) {
+        return htmlElement.style.width = newWidth + "px";
+      },
+      setWithPlusPercent: function(htmlElement, percent) {
+        var newWidth;
+        newWidth = this.getWidth(htmlElement) * percent;
+        return this.setWidth();
+      }
+    });
+
+  </script>
+</dom-module>
