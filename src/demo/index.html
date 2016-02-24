@@ -3,40 +3,40 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <title>gobstones panels demo</title>
+    <title>Gobstones panels demo</title>
 
     <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
     
-    <script src="demo.js"></script>
     <link rel="stylesheet" type="text/css" href="demo.css">
     <link rel="import" href="../bower_components/polymer/polymer.html">
     <link rel="import" href="../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+    <script src="demo.js"></script>
     
-    <link rel="import" href="../dist/components/gs-panels-container.html">
-    <link rel="import" href="../dist/components/gs-panel.html">
+    <link rel="import" href="../dist/components/gs-panels.html">
+    <link rel="import" href="../dist/components/gs-simple-panel.html">
+    <link rel="import" href="../dist/components/gs-compound-panel.html">
     
   </head>
   <body>
 
-    <p id="demo-header">An example of <code>&lt;gs-panel&gt;</code>:</p>
+    <p id="demo-header">An example of <code>&lt;gs-panels&gt;</code>:</p>
     
-    <gs-panels-container height="500px" id="panel-manager">
-      
-      <gs-panel id="panel-1">
-        <div id="div"> gs-panel</div>
-      </gs-panel>
+    <button id="addHeader">Add Header</button>
+    
+    <button id="addFooter">Add Footer</button>
+    
+    <button id="addButtonMultiple">Add Multiple Button</button>
 
-      <gs-panel id="panel-2">
-        <div id="div"> gs-panel</div>
-        <div id="div"></div>
-      </gs-panel>
 
-      <gs-panel id="panel-3">
-        <div id="div"> gs-panel</div>
-        <div id="div"></div>
-      </gs-panel>
+    <div id="header">
+      Gobsones
 
-    </gs-panels-container>
+    </div>
+    <div id="footer"></div>
+    <div id="middle"></div>
+
+    <gs-panels id="panel-manager" orientation="vertical">
+    </gs-panels>
 
   </body>
 </html>

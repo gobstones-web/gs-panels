@@ -1,0 +1,29 @@
+:host {
+	flex-direction: column;
+	order: 0;
+	flex: 1 0 auto;
+	align-self: auto;
+	min-width: 0;
+	min-height: auto;
+	::content {
+		.container{
+			&.horizontal{
+				order: 0;
+				//flex: 1 0 auto;
+				align-self: auto;
+				min-width: 0;
+				min-height: auto;
+				height: 100%;
+			}
+			&.vertical{
+				flex-direction: column;
+				order: 0;
+				//flex: 1 0 auto;
+				align-self: auto;
+				min-width: 0;
+				min-height: auto;
+				width: 100%;
+			}
+		}
+	}
+}

@@ -6,36 +6,27 @@ body {
   background-color: #b2ebf2;
 }
 
+#demo-header {
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  text-align: center;
+}
+
 #panel-manager {
   background-color: #ff7043;
   border-radius: 10px;
-  margin-left: 20%;
-  padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px;
   font-size: 1em;
   font-style: italic;
+  width: 800px;
+  height: 500px;
 }
 
-#demo-header {
-  text-align: center;
-  background-color: #4db6ac;
-  color: #000000;
-  font-size: 2em;
-}
-#demo-header code {
-  font-size: 1em;
-  font-style: bold;
-}
-
-#panel-1 {
-  width: 500px;
-}
-
-#panel-2 {
-  width: 300px;
-}
-
-#panel-3 {
-  width: 128px;
+#header {
+  background-color: #3F51B5;
 }
 
 /*# sourceMappingURL=demo.css.map */
