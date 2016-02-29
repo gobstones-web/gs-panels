@@ -1,0 +1,41 @@
+<link rel="import" href="../../../gs-common/dist/components/dom-inject.html">
+<dom-module id="gs-panel-simple">
+  <template>
+    <style>
+      :host {
+        float: left;
+        display: block;
+        height: 100%;
+      }
+      :host .inject-container {
+        display: block;
+        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        height: 100%;
+      }
+      :host .inject-container:hover {
+        margin-bottom: -15px;
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+
+    </style>
+
+    <div class="inject-container" >
+      <dom-inject element="{{concretElement}}"></dom-inject>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panel-simple',
+      properties: {
+        concretElement: {
+          type: Object
+        }
+      }
+    });
+
+  </script>
+</dom-module>

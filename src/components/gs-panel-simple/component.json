@@ -1,0 +1,4 @@
+{
+  "name": "gs-panel-simple",
+  "imports": ["../../../gs-common/dist/components/dom-inject.html"]
+}

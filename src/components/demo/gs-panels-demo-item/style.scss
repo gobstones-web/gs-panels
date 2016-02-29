@@ -1,0 +1,17 @@
+:host{
+  display: block;
+  padding: 10px;
+  min-width: 200px;
+  &.red{
+    background-color: red;
+  }
+  &.blue{
+    background-color: blue;
+  }
+  &.green{
+    background-color: green;
+  }
+  .name{
+    font-size: 30px;
+  }
+}

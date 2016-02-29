@@ -1,6 +1,6 @@
 {
   "name": "gs-panels",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "authors": [
     "Nazareno Castro <nazarenomartincastro@gmail.com>"
   ],
@@ -14,16 +14,18 @@
   "license": "MIT",
   "homepage": "index.html",
   "ignore": [
-    "**/.*",
     "node_modules",
-    "staging/bower_components",
+    "bower_components",
     "test",
     "tests"
   ],
   "dependencies": {
-    "jquery": "~1.9.1",
     "polymer": "Polymer/polymer#^1.2.0",
-    "jquery-ui": "~1.9.2",
-    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.3"
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.3",
+    "gs-common": "~0.0.2-r"
+  },
+  "devDependencies": {
+    "iron-input": "polymerelements/iron-input#~1.0.8",
+    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.2"
   }
 }

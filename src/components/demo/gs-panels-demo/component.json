@@ -1,0 +1,9 @@
+{
+  "name": "gs-panels-demo",
+  "imports": [
+    "../gs-panel-root.html",
+    "gs-panels-demo-item.html",
+    "../../../../iron-input/iron-input.html",
+    "../../../../paper-checkbox/paper-checkbox.html"
+  ]
+}

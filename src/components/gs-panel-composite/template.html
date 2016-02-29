@@ -1,0 +1,11 @@
+
+<div id="minHeightContainer">
+  <template is="dom-repeat" items="{{children}}" as="child">
+    <div class="inject-container">
+      <dom-inject element="{{child}}"></dom-inject>
+    </div>
+  </template>
+</div>
+<template is="dom-if" if="{{horizontal}}">
+  <gs-panel-height-resize></gs-panel-height-resize>
+</template>

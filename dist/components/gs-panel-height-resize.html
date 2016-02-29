@@ -1,0 +1,39 @@
+<dom-module id="gs-panel-height-resize">
+  <template>
+    <style>
+      :host {
+        display: block;
+        background-color: #0f0;
+        clear: both;
+        height: 7px;
+        width: 100%;
+        text-align: center;
+        overflow-y: hidden;
+        line-height: 0px;
+        cursor: s-resize;
+      }
+
+    </style>
+
+    <span class="points">...</span>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panel-height-resize',
+      listeners: {
+        'mousedown': '_mousedown'
+      },
+      _mousedown: function(evnt) {
+        if (evnt.which !== 1) {
+          return;
+        }
+        return this.fire('begin-resize', {
+          clientX: evnt.clientX,
+          clientY: evnt.clientY
+        });
+      }
+    });
+
+  </script>
+</dom-module>

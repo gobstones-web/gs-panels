@@ -1,0 +1,18 @@
+:host{
+  .controls{
+    margin: 20px;
+  }
+  .panels-wrapper{
+    margin: 20px;
+    #gsPanels{
+      min-height: 20px;
+    }
+  }
+  .left-block{
+    height: 200px;
+    width: 200px;
+    background-color: green;
+    float: left;
+  }
+  
+}

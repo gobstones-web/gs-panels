@@ -1,11 +1,16 @@
 'use strict'
 
+version = '0.0.1'
+
 LIVERELOAD_PORT = 35730
 lrSnippet = require('connect-livereload')(port: LIVERELOAD_PORT)
+exec = require('child_process').execSync;
 
 # var conf = require('./conf.'+process.env.NODE_ENV);
 mountFolder = (connect, dir) ->
   connect.static require('path').resolve(dir)
+
+app_name = require('./bower.json').name
 
 # # Globbing
 # for performance reasons we're only matching one level down:
@@ -13,6 +18,12 @@ mountFolder = (connect, dir) ->
 # use this if you want to recursively match all subfolders:
 # 'test/spec/**/*.js'
 module.exports = (grunt) ->
+  
+  unless app_name
+    throw new TypeError('must specify an application name in bower.json file')
+    
+  grunt.log.write 'application name: ' + app_name + '\n'
+    
   require('load-grunt-tasks') grunt
   require('time-grunt') grunt
   # configurable paths
@@ -55,8 +66,8 @@ module.exports = (grunt) ->
       coffee_demo:
         files: ['<%= yeoman.src %>/demo/**/*.coffee']
         tasks: ['scripts:demo']
-      sass_components:
-        files: ['<%= yeoman.src %>/components/**/*.scss']
+      sass_common_and_components:
+        files: ['<%= yeoman.src %>/{components,common}/**/*.scss']
         tasks: ['sass:src_tmp','components_build:tmp_dist']
       sass_demo:
         files: ['<%= yeoman.src %>/demo/**/*.scss']
@@ -93,7 +104,7 @@ module.exports = (grunt) ->
 
     open:
       server:
-        url: 'http://<%= connect.options.hostname %>:<%= connect.options.port %>/demo'
+        url: 'http://<%= connect.options.hostname %>:<%= connect.options.port %>/bower_components/' + app_name + '/demo'
         
     clean:
       dist:
@@ -306,6 +317,7 @@ module.exports = (grunt) ->
       new_line = indent = ''
       mkindent = (text, amount)-> text
     mkimport = (src)->"<link rel=\"import\" href=\"#{src}\">"
+    mkdependency = (src)->"<script type=\"text/javascript\" src=\"#{src}\"></script>"
     mktag = (name, content, margin)->
       margin = margin or 0
       open_tag = '<'+name+'>'
@@ -322,8 +334,12 @@ module.exports = (grunt) ->
       component = grunt.file.readJSON file.src[0]
       
       content = ''
-      for external_component in component.imports
+      imports = component.imports or []
+      for external_component in imports
         content += mkimport(external_component) + new_line
+      dependencies = component.require or []
+      for external_dependency in dependencies
+        content += mkdependency(external_dependency) + new_line
         
       content += "<dom-module id=\"#{component.name}\">" + new_line
       
@@ -341,14 +357,14 @@ module.exports = (grunt) ->
       content += mktag 'script', script_content, 1
       
       content += "</dom-module>"
-      grunt.log.write content
+      #grunt.log.write content
       
       reg_exp = new RegExp(component.name + '\/?$')
       if reg_exp.test json_dst.dir
-        grunt.log.write 'replacing directory by file' + json_src.dir + '\n'
+        grunt.log.write 'replacing directory by file: ' + json_src.dir + '\n'
         file_dest = json_dst.dir.replace(reg_exp, '') + component.name + '.html'
       else
-        grunt.log.write 'creating file into directory' + json_src.dir + '\n'
+        grunt.log.write 'creating file into directory: ' + json_src.dir + '\n'
         file_dest = json_dst.dir + '/' + component.name + '.html'
         
       grunt.log.write 'file: ' + file_dest + '\n'
@@ -359,6 +375,19 @@ module.exports = (grunt) ->
       #grunt.log.writeflags json_src
       #grunt.log.write json_src.dir + ' is equal ' + component.name + '\n'
       #mkimport('index.html')
+  
+  
+  grunt.registerTask 'symlinks', (target) ->
+    cwd = 'bower_components/' + app_name
+    commands = [
+      'rm -rf ' + cwd
+      'mkdir -p ' + cwd
+      'ln -s ../../demo ' + cwd + '/demo'
+      'ln -s ../../dist ' + cwd + '/dist'
+    ]
+    for command in commands
+      grunt.log.write command + '\n'
+      exec command, cdw: __dirname
       
   grunt.registerTask 'scripts', (target) ->
     switch target
@@ -403,6 +432,7 @@ module.exports = (grunt) ->
       'sass:src_tmp'
       'components_build:tmp_dist'
       'demo'
+      'symlinks'
       
       'connect:livereload'
       'open'

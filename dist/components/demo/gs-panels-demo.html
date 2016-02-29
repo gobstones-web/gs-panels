@@ -1,0 +1,109 @@
+<link rel="import" href="../gs-panel-root.html">
+<link rel="import" href="gs-panels-demo-item.html">
+<link rel="import" href="../../../../iron-input/iron-input.html">
+<link rel="import" href="../../../../paper-checkbox/paper-checkbox.html">
+<dom-module id="gs-panels-demo">
+  <template>
+    <style>
+      :host .controls {
+        margin: 20px;
+      }
+      :host .panels-wrapper {
+        margin: 20px;
+      }
+      :host .panels-wrapper #gsPanels {
+        min-height: 20px;
+      }
+      :host .left-block {
+        height: 200px;
+        width: 200px;
+        background-color: green;
+        float: left;
+      }
+
+    </style>
+
+
+
+    <div class="controls">
+      <span>Main Width (0 = 100%): </span><br/>
+      <input is="iron-input" bind-value="{{mainWidth}}" /><br/>
+      <span>Main Height (0 = auto, current min-heigth = 20px): </span><br/>
+      <input is="iron-input" bind-value="{{mainHeight}}" /><br/>
+      <paper-checkbox checked="{{showLeftBlock}}">Show left block</paper-checkbox><br/>
+      <button id="panelA" >agregar panel a</button>
+      <button id="panelB" >agregar panel b</button>
+      <button id="panelC" >agregar panel b</button><br/>
+    </div>
+
+    <template is="dom-if" if="{{showLeftBlock}}">
+      <div class="left-block"></div>
+    </template>
+    <div class="panels-wrapper">
+      <gs-panel-root id="gsPanels" debug="true"></gs-panel-root>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panels-demo',
+      properties: {
+        mainWidth: {
+          type: Number,
+          observer: '_main_width_change'
+        },
+        mainHeight: {
+          type: Number,
+          observer: '_main_height_change'
+        }
+      },
+      listeners: {
+        'panelA.tap': '_add_panel_a',
+        'panelB.tap': '_add_panel_b',
+        'panelC.tap': '_add_panel_c'
+      },
+      ready: function() {
+        var panels;
+        return this.panels = panels = this.$.gsPanels;
+      },
+      _add_panel_a: function() {
+        var item;
+        item = document.createElement('gs-panels-demo-item');
+        item.elementClasses = 'red';
+        item.elementName = 'panel A';
+        return this.panels.add(item);
+      },
+      _add_panel_b: function() {
+        var item;
+        item = document.createElement('gs-panels-demo-item');
+        item.elementClasses = 'green';
+        item.elementName = 'panel B';
+        return this.panels.add(item);
+      },
+      _add_panel_c: function() {
+        var item;
+        item = document.createElement('gs-panels-demo-item');
+        item.elementClasses = 'blue';
+        item.elementName = 'panel C';
+        return this.panels.add(item);
+      },
+      _is_numeric: function(value) {
+        return !isNaN(value) && value !== '';
+      },
+      _main_width_change: function() {
+        if (this._is_numeric(this.mainWidth)) {
+          return this.panels && (this.panels.style.width = this.mainWidth + 'px');
+        } else {
+          return this.panels && (this.panels.style.width = '100%');
+        }
+      },
+      _main_height_change: function() {
+        if (this._is_numeric(this.mainHeight)) {
+          return this.panels && (this.panels.style.height = this.mainHeight + 'px');
+        } else {
+          return this.panels && (this.panels.style.height = 'auto');
+        }
+      }
+    });
+
+  </script>
+</dom-module>

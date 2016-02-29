@@ -1,0 +1,8 @@
+{
+  "name": "gs-panel-composite",
+  "imports": [
+    "gs-panel-simple.html",
+    "gs-panel-height-resize.html",
+    "../../../gs-common/dist/components/dom-inject.html"
+  ]
+}

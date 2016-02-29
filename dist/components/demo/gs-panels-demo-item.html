@@ -1,0 +1,117 @@
+<link rel="import" href="../../../../gs-common/dist/components/dom-iterate.html">
+<dom-module id="gs-panels-demo-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+        min-width: 200px;
+      }
+      :host.red {
+        background-color: red;
+      }
+      :host.blue {
+        background-color: blue;
+      }
+      :host.green {
+        background-color: green;
+      }
+      :host .name {
+        font-size: 30px;
+      }
+
+    </style>
+
+    <p class="name">{{elementName}}</p>
+    <p>
+      <template is="dom-iterate" from="0" to="{{lines}}">
+        line: <span>{{index}}</span><br/>
+      </template>
+    </p>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'gs-panels-demo-item',
+      properties: {
+        elementName: {
+          type: String,
+          value: 'unknow'
+        },
+        elementClasses: {
+          type: String,
+          value: 'unknow',
+          observer: '_update'
+        },
+        lines: {
+          type: Number,
+          value: 10
+        }
+      },
+      created: function() {
+        return this._elementClasses = [];
+      },
+      ready: function() {
+        return this._update();
+      },
+      _kleasses: function() {
+        var elementClass, next, _i, _len, _ref;
+        next = [];
+        if (!this.elementClasses || typeof this.elementClasses !== 'string') {
+          return next;
+        }
+        _ref = this.elementClasses.split(/\s+/);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          elementClass = _ref[_i];
+          if (!/^\s*$/.test(elementClass)) {
+            next.push(elementClass);
+          }
+        }
+        return next;
+      },
+      _add: function(klasses) {
+        var klass, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = klasses.length; _i < _len; _i++) {
+          klass = klasses[_i];
+          _results.push(this.classList.add(klass));
+        }
+        return _results;
+      },
+      _remove: function(klasses) {
+        var klass, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = klasses.length; _i < _len; _i++) {
+          klass = klasses[_i];
+          _results.push(this.classList.remove(klass));
+        }
+        return _results;
+      },
+      _update: function() {
+        var add, index, klass, next, remove, _i, _j, _len, _len1, _ref;
+        remove = [];
+        add = [];
+        next = this._kleasses();
+        _ref = this._elementClasses;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          klass = _ref[_i];
+          index = next.indexOf(klass);
+          if (index === -1) {
+            remove.push(klass);
+          }
+        }
+        for (_j = 0, _len1 = next.length; _j < _len1; _j++) {
+          klass = next[_j];
+          index = this._elementClasses.indexOf(klass);
+          if (index === -1) {
+            add.push(klass);
+          }
+        }
+        this._elementClasses = next;
+        this._remove(remove);
+        return this._add(add);
+      }
+    });
+
+  </script>
+</dom-module>
