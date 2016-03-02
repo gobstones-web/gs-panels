@@ -7,26 +7,22 @@ GS.Rezisable =
   properties: 
     parentOrientation:
       type: String
-    notLast:
-      type: Boolean
-    index:
-      type: Number
-      obsrver: '__position_change'
-    levelLength:
-      type: Number
-      obsrver: '__position_change'
       
   listeners:
     'begin-resize': '__on_begin_resize'
     
   HORIZONTAL: 'horizontal'
-  VERTICAL: 'vertical'
-        
+  VERTICAL:   'vertical'
+  
+  parse_px: (in_px)->
+    if /px$/.test in_px
+      value = parseFloat in_px.slice(0, -2)
+    else
+      console.log 'Error in px parsing. Receives: ' +  in_px
+    value
+    
   ready: ->
     @__make_resizable()
-    
-  __position_change:->
-    @notLast = @index < @levelLength  
     
   __make_resizable: ->
     ori = @parentOrientation = @parentOrientation or @HORIZONTAL

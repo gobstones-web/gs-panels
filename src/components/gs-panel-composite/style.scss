@@ -2,7 +2,14 @@
   background-color: #BBF;
   display: flex;
   flex: 1;
-  // .horizontal{
-    // flex-direction: column;
-  // }
+  .vertical{
+    flex-direction: column;
+  }
+  .horizontal{
+    
+  }
+  > #container{
+    display: flex;
+    flex: 1;
+  }
 }

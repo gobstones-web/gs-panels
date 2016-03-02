@@ -1,6 +1,6 @@
-<template is="dom-repeat" items="{{children}}" as="child">
-  <dom-inject element="{{child}}"></dom-inject>
+<template is="dom-repeat" items="{{children}}" as="child" index-as="itemIndex">
+  <template is="dom-inject" element="{{child}}"></template>
 </template>
-<template is="dom-if" if="{{not_last}}">
+<template is="dom-if" if="{{notLast}}">
   <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
 </template>

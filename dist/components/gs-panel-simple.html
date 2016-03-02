@@ -9,17 +9,13 @@
         overflow: hidden;
         overflow-x: hidden;
         overflow-y: hidden;
-        min-width: 50px;
-      }
-      :host:hover {
-        overflow-y: auto;
-        overflow-x: auto;
+        min-width: 150px;
       }
 
     </style>
 
-    <dom-inject element="{{concretElement}}"></dom-inject>
-    <template is="dom-if" if="{{not_last}}">
+    <template is="dom-inject" element="{{concretElement}}"></template>
+    <template is="dom-if" if="{{notLast}}">
       <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
 
@@ -30,9 +26,21 @@
       properties: {
         concretElement: {
           type: Object
+        },
+        panelHeight: {
+          type: Number,
+          observer: '_panel_height_change'
         }
       },
-      behaviors: [GS.Rezisable]
+      behaviors: [GS.Rezisable],
+      ready: function() {
+        this.container = this.$.container;
+        return this.classList.add('child-of-' + this.parentOrientation);
+      },
+      _panel_height_change: function() {
+        this.clientHeight = this.panelHeight + 'px';
+        return this.concretElement.style.height = this.panelHeight + 'px';
+      }
     });
 
   </script>

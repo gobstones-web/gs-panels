@@ -40,27 +40,34 @@
         float: right;
         background-color: #F43;
       }
-      :host .center {
+      :host .center-container {
         flex: 1;
+        display: flex;
+        flex-flow: column;
+      }
+      :host .center-container .center {
+        flex: 1;
+        display: flex;
         background-color: transparent;
         flex-flow: column;
       }
-      :host .center .bottom,
-      :host .center .top {
+      :host .center-container .center .bottom,
+      :host .center-container .center .top {
         height: 10px;
         display: flex;
+        width: 100%;
       }
-      :host .center .content {
+      :host .center-container .center .content {
         flex: 1;
         width: 100%;
         background-color: transparent;
         overflow: hidden;
       }
-      :host .center .bottom {
+      :host .center-container .center .bottom {
         background-color: #05F;
         align-self: flex-end;
       }
-      :host .center .top {
+      :host .center-container .center .top {
         background-color: #F50;
         align-self: flex-start;
       }
@@ -72,19 +79,21 @@
       <div class="bottom"></div>
       
     </div>
-    <div class="center">
-      <div class="top"></div>
-      <div class="content">
-        <div class="inline-content">
-          <p class="name">{{elementName}}</p>
-          <p>
-            <template is="dom-iterate" from="0" to="{{lines}}">
-              line: <span>{{index}}</span><br/>
-            </template>
-          </p>
+    <div class="center-container">
+      <div class="center">
+        <div class="top"></div>
+        <div class="content">
+          <div class="inline-content">
+            <p class="name">{{elementName}}</p>
+            <p>
+              <template is="dom-iterate" from="0" to="{{lines}}">
+                line: <span>{{index}}</span>  complex panel<br/>
+              </template>
+            </p>
+          </div>
         </div>
+        <div class="bottom"></div>
       </div>
-      <div class="bottom"></div>
     </div>
     <div class="right">
       <div class="top"></div>

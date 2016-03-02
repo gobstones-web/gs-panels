@@ -1,7 +1,6 @@
 :host{
+  box-sizing: border-box;
   display: block;
-  padding: 10px;
-  min-width: 50px;
   height: 100%;
   width: 100%;
   &.red{
@@ -17,5 +16,21 @@
   }
   .name{
     font-size: 30px;
+  }
+  .scrollable{
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    &:hover{
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    .container{
+      width: 300px;
+    }
+    .fixer{
+      width: 100%;
+      clear: both;
+    }
   }
 }

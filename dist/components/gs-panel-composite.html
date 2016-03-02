@@ -10,13 +10,20 @@
         display: flex;
         flex: 1;
       }
+      :host .vertical {
+        flex-direction: column;
+      }
+      :host > #container {
+        display: flex;
+        flex: 1;
+      }
 
     </style>
 
-    <template is="dom-repeat" items="{{children}}" as="child">
-      <dom-inject element="{{child}}"></dom-inject>
+    <template is="dom-repeat" items="{{children}}" as="child" index-as="itemIndex">
+      <template is="dom-inject" element="{{child}}"></template>
     </template>
-    <template is="dom-if" if="{{not_last}}">
+    <template is="dom-if" if="{{notLast}}">
       <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
   </template>
@@ -26,31 +33,45 @@
       properties: {
         children: {
           type: Array
+        },
+        panelHeight: {
+          type: Number,
+          value: 0
+        },
+        orientation: {
+          type: String
         }
       },
       behaviors: [GS.Rezisable],
-      created: function() {},
+      observers: ['_update(children.*, panelHeight)'],
       ready: function() {
-        return this.children = [];
+        this.children = [];
+        this.orientation = this.orientation || GS.HORIZONTAL;
+        this.classList.add(this.orientation);
+        return this.classList.add('child-of-' + this.parentOrientation);
       },
-      attached: function() {
-        var maxHeight, panel_height_and_resize_bar;
-        if (this.panelHeight && !isNaN(this.panelHeight) && this.panelHeight !== '') {
-          return this.style.maxHeight = this.panelHeight + 'px';
+      _update: function() {
+        var child, index, last_index, _i, _len, _ref, _results;
+        if (this.children.length > 0) {
+          this.style.height = this.panelHeight + 'px';
         } else {
-          maxHeight = window.getComputedStyle(this).maxHeight;
-          if (/px$/.test(maxHeight)) {
-            panel_height_and_resize_bar = parseFloat(maxHeight.slice(0, -2));
-            return this.panelHeight = panel_height_and_resize_bar - 7;
-          } else {
-            return this.panelHeight = 0;
-          }
+          this.style.height = 'none';
         }
+        last_index = this.children.length - 1;
+        _ref = this.children;
+        _results = [];
+        for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+          child = _ref[index];
+          child.panelHeight = this.panelHeight;
+          _results.push(child.notLast = index !== last_index);
+        }
+        return _results;
       },
       add: function(element) {
         var next;
         next = document.createElement('gs-panel-simple');
         next.concretElement = element;
+        next.parentOrientation = this.orientation;
         this.__after_push(next, 0);
         return this.push('children', next);
       }

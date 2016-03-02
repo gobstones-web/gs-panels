@@ -1,2 +1,10 @@
-<gs-panel-composite id="main" parentOrientation="{{orientation}}"></gs-panel-composite>
-<gs-panel-resize class="vertical"></gs-panel-resize>
+<div id="heightFixer">
+  <gs-panel-composite 
+    id="main" 
+    panel-height="{{childHeight}}" 
+    parent-orientation="{{orientation}}"
+    orientation="{{mainOrientation}}"
+  >
+  </gs-panel-composite>
+</div>
+<gs-panel-resize id="panelReziser" class="vertical"></gs-panel-resize>

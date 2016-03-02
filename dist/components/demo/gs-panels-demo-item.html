@@ -3,9 +3,8 @@
   <template>
     <style>
       :host {
+        box-sizing: border-box;
         display: block;
-        padding: 10px;
-        min-width: 50px;
         height: 100%;
         width: 100%;
       }
@@ -23,16 +22,36 @@
       :host .name {
         font-size: 30px;
       }
+      :host .scrollable {
+        height: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      :host .scrollable:hover {
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+      :host .scrollable .container {
+        width: 300px;
+      }
+      :host .scrollable .fixer {
+        width: 100%;
+        clear: both;
+      }
 
     </style>
 
-    <p class="name">{{elementName}}</p>
-    <p>
-      <template is="dom-iterate" from="0" to="{{lines}}">
-        line: <span>{{index}}</span><br/>
-      </template>
-    </p>
-
+    <div class="scrollable">
+      <div class="container">
+        <p class="name">{{elementName}}</p>
+        <p>
+          <template is="dom-iterate" from="0" to="{{lines}}">
+            line: <span>{{index}}</span> simple panel<br/>
+          </template>
+        </p>
+      </div>
+      <div class="fixer"></div>
+    </div>
   </template>
   <script>
     Polymer({

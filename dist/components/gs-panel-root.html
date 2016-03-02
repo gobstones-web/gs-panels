@@ -5,18 +5,27 @@
   <template>
     <style>
       :host {
-        display: flex;
-        flex-flow: column;
+        display: block;
+        width: 100%;
+        background-color: #BBB;
+      }
+      :host #heightFixer {
         width: 100%;
         min-height: 80px;
-        max-height: 80px;
-        height: 80px;
       }
 
     </style>
 
-    <gs-panel-composite id="main" parentOrientation="{{orientation}}"></gs-panel-composite>
-    <gs-panel-resize class="vertical"></gs-panel-resize>
+    <div id="heightFixer">
+      <gs-panel-composite 
+        id="main" 
+        panel-height="{{childHeight}}" 
+        parent-orientation="{{orientation}}"
+        orientation="{{mainOrientation}}"
+      >
+      </gs-panel-composite>
+    </div>
+    <gs-panel-resize id="panelReziser" class="vertical"></gs-panel-resize>
 
   </template>
   <script>
@@ -30,7 +39,18 @@
         },
         orientation: {
           type: String,
+          value: GS.Rezisable.VERTICAL
+        },
+        mainOrientation: {
+          type: String,
           value: GS.Rezisable.HORIZONTAL
+        },
+        rootHeight: {
+          type: Number
+        },
+        childHeight: {
+          type: Number,
+          observer: 'child_height_change'
         }
       },
       behaviors: [GS.Rezisable],
@@ -38,7 +58,31 @@
         return this.parentOrientation = GS.Rezisable.VERTICAL;
       },
       ready: function() {
-        return this.main = this.$.main;
+        this.main = this.$.main;
+        this.reziser = this.$.panelReziser;
+        return this.fixer = this.$.heightFixer;
+      },
+      attached: function() {
+        var MAX_HEIGHT, maxHeight, resizer_h;
+        MAX_HEIGHT = 200;
+        resizer_h = this.reziser.clientHeight;
+        this.minHeightSupported = this.parse_px(this.molt(this.fixer).minHeight);
+        if (this.rootHeight) {
+          this.childHeight = this.rootHeight - resizer_h;
+          maxHeight = this.rootHeight + 'px';
+        } else {
+          if (this.minHeightSupported > MAX_HEIGHT) {
+            maxHeight = (this.minHeightSupported + resizer_h) + 'px';
+            this.childHeight = this.minHeightSupported;
+          } else {
+            maxHeight = (MAX_HEIGHT + resizer_h) + 'px';
+            this.childHeight = MAX_HEIGHT;
+          }
+        }
+        return this.style.maxHeight = maxHeight;
+      },
+      child_height_change: function() {
+        return this.fixer.style.maxHeight = this.childHeight + 'px';
       },
       _debug_change: function() {
         if (!this.container) {
@@ -50,20 +94,26 @@
           return this.container.classList.remove('debug');
         }
       },
+      molt: function(elem) {
+        return window.getComputedStyle(elem);
+      },
       begin_resize: function(context, evnt) {
-        return context.initialMinHeight = window.getComputedStyle(this).getPropertyValue("min-height");
+        context.minHeightPX = this.molt(this.fixer).minHeight;
+        return context.reziserHeight = this.reziser.clientHeight;
       },
       resize: function(context, evnt) {
         var nextHeight, y_delta;
         y_delta = evnt.clientY - context.initial_mouse_y;
         nextHeight = context.initial_frame_heigth + y_delta;
-        this.style.minHeight = nextHeight + 'px';
-        this.style.maxHeight = nextHeight + 'px';
-        this.style.height = nextHeight + 'px';
+        if (nextHeight > this.minHeightSupported) {
+          this.childHeight = nextHeight - context.reziserHeight;
+          this.fixer.style.minHeight = this.childHeight + 'px';
+          this.style.maxHeight = nextHeight + 'px';
+        }
         return false;
       },
       finish_resize: function(context) {
-        this.style.minHeight = context.initialMinHeight;
+        this.fixer.style.minHeight = context.minHeightPX;
         this.style.transition = '0.5s';
         return false;
       },

@@ -15,17 +15,6 @@
       properties: {
         parentOrientation: {
           type: String
-        },
-        notLast: {
-          type: Boolean
-        },
-        index: {
-          type: Number,
-          obsrver: '__position_change'
-        },
-        levelLength: {
-          type: Number,
-          obsrver: '__position_change'
         }
       },
       listeners: {
@@ -33,11 +22,17 @@
       },
       HORIZONTAL: 'horizontal',
       VERTICAL: 'vertical',
+      parse_px: function(in_px) {
+        var value;
+        if (/px$/.test(in_px)) {
+          value = parseFloat(in_px.slice(0, -2));
+        } else {
+          console.log('Error in px parsing. Receives: ' + in_px);
+        }
+        return value;
+      },
       ready: function() {
         return this.__make_resizable();
-      },
-      __position_change: function() {
-        return this.notLast = this.index < this.levelLength;
       },
       __make_resizable: function() {
         var ori;

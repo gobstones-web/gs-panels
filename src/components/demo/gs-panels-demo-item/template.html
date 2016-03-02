@@ -1,6 +1,11 @@
-<p class="name">{{elementName}}</p>
-<p>
-  <template is="dom-iterate" from="0" to="{{lines}}">
-    line: <span>{{index}}</span><br/>
-  </template>
-</p>
+<div class="scrollable">
+  <div class="container">
+    <p class="name">{{elementName}}</p>
+    <p>
+      <template is="dom-iterate" from="0" to="{{lines}}">
+        line: <span>{{index}}</span> simple panel<br/>
+      </template>
+    </p>
+  </div>
+  <div class="fixer"></div>
+</div>
