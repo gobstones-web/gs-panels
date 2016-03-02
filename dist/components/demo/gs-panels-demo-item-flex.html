@@ -1,13 +1,11 @@
-<link rel="import" href="../../../../gs-common/dist/components/dom-iterate.html">
-<dom-module id="gs-panels-demo-item">
+<dom-module id="gs-panels-demo-item-flex">
   <template>
     <style>
       :host {
-        display: block;
-        padding: 10px;
         min-width: 50px;
-        height: 100%;
-        width: 100%;
+        min-height: 50px;
+        display: flex;
+        flex: 1;
       }
       :host.red {
         background-color: red;
@@ -23,20 +21,80 @@
       :host .name {
         font-size: 30px;
       }
+      :host .inline-content {
+        display: block;
+        overflow: hidden;
+      }
+      :host .left,
+      :host .right,
+      :host .center {
+        display: flex;
+      }
+      :host .left {
+        width: 10px;
+        float: left;
+        background-color: #34F;
+      }
+      :host .right {
+        width: 10px;
+        float: right;
+        background-color: #F43;
+      }
+      :host .center {
+        flex: 1;
+        background-color: transparent;
+        flex-flow: column;
+      }
+      :host .center .bottom,
+      :host .center .top {
+        height: 10px;
+        display: flex;
+      }
+      :host .center .content {
+        flex: 1;
+        width: 100%;
+        background-color: transparent;
+        overflow: hidden;
+      }
+      :host .center .bottom {
+        background-color: #05F;
+        align-self: flex-end;
+      }
+      :host .center .top {
+        background-color: #F50;
+        align-self: flex-start;
+      }
 
     </style>
 
-    <p class="name">{{elementName}}</p>
-    <p>
-      <template is="dom-iterate" from="0" to="{{lines}}">
-        line: <span>{{index}}</span><br/>
-      </template>
-    </p>
+    <div class="left">
+      <div class="top"></div>
+      <div class="bottom"></div>
+      
+    </div>
+    <div class="center">
+      <div class="top"></div>
+      <div class="content">
+        <div class="inline-content">
+          <p class="name">{{elementName}}</p>
+          <p>
+            <template is="dom-iterate" from="0" to="{{lines}}">
+              line: <span>{{index}}</span><br/>
+            </template>
+          </p>
+        </div>
+      </div>
+      <div class="bottom"></div>
+    </div>
+    <div class="right">
+      <div class="top"></div>
+      <div class="bottom"></div>
+    </div>
 
   </template>
   <script>
     Polymer({
-      is: 'gs-panels-demo-item',
+      is: 'gs-panels-demo-item-flex',
       properties: {
         elementName: {
           type: String,

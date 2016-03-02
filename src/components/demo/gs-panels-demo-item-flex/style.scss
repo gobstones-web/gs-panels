@@ -1,0 +1,71 @@
+:host{
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  flex: 1;
+  &.red{
+    background-color: red;
+    color: white;
+  }
+  &.blue{
+    background-color: blue;
+    color: white;
+  }
+  &.green{
+    background-color: #0D0;
+  }
+  .name{
+    font-size: 30px;
+  }
+  .inline-content{
+    display: block;
+    overflow: hidden;
+  }
+  .left,
+  .right,
+  .center{
+    display: flex;
+  }
+  .left{
+    width: 10px;
+    float: left;
+    background-color: #34F;
+    //align-self: flex-start;
+  }
+  .right{
+    width: 10px;
+    float: right;
+    background-color: #F43;
+    //align-self: flex-end;
+  }
+  .center{
+    flex:1;
+    //height: auto;
+    //width: 100%;
+    background-color: transparent;
+    
+    //overflow: hidden;
+    //overflow-x: hidden;
+    //overflow-y: hidden;
+    flex-flow: column;
+    .bottom,
+    .top{
+      height: 10px;
+      display: flex;
+    }
+    .content{
+      flex:1;
+      width: 100%;
+      background-color: transparent;
+      overflow: hidden;
+    }
+    .bottom{
+      background-color: #05F;
+      align-self: flex-end;
+    }
+    .top{
+      background-color: #F50;
+      align-self: flex-start;
+    }
+  }
+}

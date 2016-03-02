@@ -1,3 +1,4 @@
-<div class="inject-container" >
-  <dom-inject element="{{concretElement}}"></dom-inject>
-</div>
+<dom-inject element="{{concretElement}}"></dom-inject>
+<template is="dom-if" if="{{not_last}}">
+  <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
+</template>

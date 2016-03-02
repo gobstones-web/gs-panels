@@ -4,7 +4,6 @@ Polymer
   listeners:
     'mousedown': '_mousedown'
 
-
   _mousedown:(evnt)->
     unless evnt.which is 1 then return 
     @fire 'begin-resize',

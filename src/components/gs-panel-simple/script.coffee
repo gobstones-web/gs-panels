@@ -5,4 +5,4 @@ Polymer
     concretElement:
       type: Object
       
-  
+  behaviors: [GS.Rezisable] 

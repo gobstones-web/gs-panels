@@ -1,17 +1,12 @@
 :host{
-  float: left;
-  display: block;
-  height: 100%;
-  .inject-container{
-    display: block;
-    overflow: hidden;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    height: 100%;
-    &:hover{
-      margin-bottom: -15px;
-      overflow-y: auto;
-      overflow-x: auto;
-    }
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  min-width: 50px;
+  &:hover{
+    overflow-y: auto;
+    overflow-x: auto;
   }
 }

@@ -1,14 +1,29 @@
 
 
 <div class="controls">
-  <span>Main Width (0 = 100%): </span><br/>
+  <span>Container Width (0 = 100%): </span><br/>
   <input is="iron-input" bind-value="{{mainWidth}}" /><br/>
-  <span>Main Height (0 = auto, current min-heigth = 20px): </span><br/>
+  <span>Container Height (0 = auto, current min-heigth = 20px): </span><br/>
   <input is="iron-input" bind-value="{{mainHeight}}" /><br/>
   <paper-checkbox checked="{{showLeftBlock}}">Show left block</paper-checkbox><br/>
-  <button id="panelA" >agregar panel a</button>
-  <button id="panelB" >agregar panel b</button>
-  <button id="panelC" >agregar panel b</button><br/>
+  
+  <paper-menu-button class="class-options">
+    <paper-button class$="dropdown-trigger {{nextClass}}" raised>
+      <iron-icon icon="check"></iron-icon>
+      <span>{{nextClass}}</span>
+    </paper-button>
+    <paper-menu class="dropdown-content" selected="{{nextClassIndex}}">
+      <template is="dom-repeat" items="{{classOptions}}">
+        <paper-item class$="{{item}}">{{item}}</paper-item>
+      </template>
+    </paper-menu>
+  </paper-menu-button>
+  <paper-checkbox checked="{{changeClassAuto}}">Change Auto</paper-checkbox><br/>
+  
+  <span>name: </span>
+  <input is="iron-input" bind-value="{{nextName}}" /><br/>
+  <button id="panelSimple" >agregar panel simple</button>
+  <button id="panelComplex" >agregar panel complejo</button>
 </div>
 
 <template is="dom-if" if="{{showLeftBlock}}">
@@ -17,3 +32,4 @@
 <div class="panels-wrapper">
   <gs-panel-root id="gsPanels" debug="true"></gs-panel-root>
 </div>
+<div class="under">Under panels page control</div>

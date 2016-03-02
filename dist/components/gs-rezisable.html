@@ -1,0 +1,133 @@
+<dom-module id="gs-rezisable">
+  <template>
+    <style>
+      
+    </style>
+
+
+  </template>
+  <script>
+    if (typeof window.GS === 'undefined') {
+      window.GS = {};
+    }
+
+    GS.Rezisable = {
+      properties: {
+        parentOrientation: {
+          type: String
+        },
+        notLast: {
+          type: Boolean
+        },
+        index: {
+          type: Number,
+          obsrver: '__position_change'
+        },
+        levelLength: {
+          type: Number,
+          obsrver: '__position_change'
+        }
+      },
+      listeners: {
+        'begin-resize': '__on_begin_resize'
+      },
+      HORIZONTAL: 'horizontal',
+      VERTICAL: 'vertical',
+      ready: function() {
+        return this.__make_resizable();
+      },
+      __position_change: function() {
+        return this.notLast = this.index < this.levelLength;
+      },
+      __make_resizable: function() {
+        var ori;
+        ori = this.parentOrientation = this.parentOrientation || this.HORIZONTAL;
+        this.extend(this, this.strategies[ori]);
+        return this[ori] = true;
+      },
+      __on_begin_resize: function(evnt) {
+        var context, mousemove, mouseup;
+        evnt.cancelBubble = true;
+        evnt.preventDefault();
+        context = {};
+        mousemove = (function(_this) {
+          return function(evnt) {
+            return _this.__rezise(context, evnt);
+          };
+        })(this);
+        mouseup = (function(_this) {
+          return function(evnt) {
+            if (evnt.which !== 1) {
+              return;
+            }
+            evnt.cancelBubble = true;
+            evnt.preventDefault();
+            _this.__finish_resize(context);
+            document.removeEventListener("mousemove", mousemove);
+            return document.removeEventListener("mouseup", mouseup);
+          };
+        })(this);
+        document.addEventListener("mouseup", mouseup);
+        document.addEventListener("mousemove", mousemove);
+        return this.__begin_resize(context, evnt);
+      },
+      strategies: {
+        vertical: {
+          __after_push: function(element, position) {},
+          __begin_resize: function(context, evnt) {
+            if (this.begin_resize && !this.begin_resize(context, evnt)) {
+              return;
+            }
+            context.initial_frame_heigth = this.clientHeight;
+            context.initial_mouse_y = evnt.detail.clientY;
+            return this.style.transition = 'none';
+          },
+          __rezise: function(context, evnt) {
+            var nextHeight, y_delta;
+            evnt.cancelBubble = true;
+            evnt.preventDefault();
+            if (this.resize && !this.resize(context, evnt)) {
+              return;
+            }
+            y_delta = evnt.clientY - context.initial_mouse_y;
+            nextHeight = context.initial_frame_heigth + y_delta;
+            return this.style.minHeight = nextHeight + 'px';
+          },
+          __finish_resize: function(context) {
+            if (this.finish_resize && !this.finish_resize(context)) {
+              return;
+            }
+            this.style.minHeight = "40px";
+            return this.style.transition = '0.5s';
+          }
+        },
+        horizontal: {
+          __after_push: function(element) {
+            var amount, children, count, css_width, last_width, real_width, width, _i, _len, _ref;
+            amount = this.children.length + 1;
+            count = 0;
+            width = 100 / amount;
+            _ref = this.children;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              children = _ref[_i];
+              children.style.width = width + '%';
+              css_width = children.style.width;
+              if (/%$/.test(css_width)) {
+                real_width = parseFloat(children.style.width.slice(0, -1));
+              } else {
+                real_width = width;
+              }
+              count += real_width;
+            }
+            last_width = 100 - count;
+            return element.style.width = last_width + '%';
+          },
+          __begin_resize: function() {},
+          __finish_resize: function() {},
+          __rezise: function() {}
+        }
+      }
+    };
+
+  </script>
+</dom-module>

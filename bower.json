@@ -21,11 +21,18 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
-    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.3",
     "gs-common": "~0.0.2-r"
   },
   "devDependencies": {
+    "paper-menu": "polymerelements/paper-menu#~1.2.2",
     "iron-input": "polymerelements/iron-input#~1.0.8",
-    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.2"
+    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.2",
+    "paper-icon-button": "polymerelements/paper-icon-button#~1.0.6",
+    "paper-menu-button": "polymerelements/paper-menu-button#~1.0.4",
+    "iron-icon": "PolymerElements/iron-icon#~1.0.7",
+    "iron-icons": "PolymerElements/iron-icons#~1.1.3",
+    "iron-image": "PolymerElements/iron-image#~1.2.2",
+    "paper-item": "PolymerElements/paper-item#~1.1.4",
+    "paper-button": "PolymerElements/paper-button#~1.0.11"
   }
 }

@@ -2,6 +2,7 @@
   "name": "gs-panel-root",
   "imports": [
     "gs-panel-composite.html",
-    "../../../iron-resizable-behavior/iron-resizable-behavior.html"
+    "gs-panel-resize.html",
+    "gs-rezisable.html"
   ]
 }

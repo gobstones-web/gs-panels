@@ -1,160 +1,58 @@
 <link rel="import" href="gs-panel-simple.html">
-<link rel="import" href="gs-panel-height-resize.html">
+<link rel="import" href="gs-panel-resize.html">
+<link rel="import" href="gs-rezisable.html">
 <link rel="import" href="../../../gs-common/dist/components/dom-inject.html">
 <dom-module id="gs-panel-composite">
   <template>
     <style>
       :host {
-        background-color: #FEF;
-        width: auto;
-        max-height: 200px;
-        height: 100%;
-        display: block;
-      }
-      :host #minHeightContainer {
-        width: 100%;
-        min-height: 40px;
-        height: auto;
-      }
-      :host #minHeightContainer .inject-container {
-        height: auto;
+        background-color: #BBF;
+        display: flex;
+        flex: 1;
       }
 
     </style>
 
-
-    <div id="minHeightContainer">
-      <template is="dom-repeat" items="{{children}}" as="child">
-        <div class="inject-container">
-          <dom-inject element="{{child}}"></dom-inject>
-        </div>
-      </template>
-    </div>
-    <template is="dom-if" if="{{horizontal}}">
-      <gs-panel-height-resize></gs-panel-height-resize>
+    <template is="dom-repeat" items="{{children}}" as="child">
+      <dom-inject element="{{child}}"></dom-inject>
+    </template>
+    <template is="dom-if" if="{{not_last}}">
+      <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
   </template>
   <script>
     Polymer({
       is: 'gs-panel-composite',
       properties: {
-        panelHeight: {
-          type: Number
-        },
-        orientation: {
-          type: String
-        },
         children: {
           type: Array
         }
       },
-      listeners: {
-        'begin-resize': '_on_begin_resize'
-      },
+      behaviors: [GS.Rezisable],
+      created: function() {},
       ready: function() {
-        this.children = [];
-        return this._extend();
+        return this.children = [];
       },
       attached: function() {
-        var maxHeight;
-        this.minHeightContainer = this.$.minHeightContainer;
+        var maxHeight, panel_height_and_resize_bar;
         if (this.panelHeight && !isNaN(this.panelHeight) && this.panelHeight !== '') {
           return this.style.maxHeight = this.panelHeight + 'px';
         } else {
           maxHeight = window.getComputedStyle(this).maxHeight;
           if (/px$/.test(maxHeight)) {
-            return this.panelHeight = parseFloat(maxHeight.slice(0, -2));
+            panel_height_and_resize_bar = parseFloat(maxHeight.slice(0, -2));
+            return this.panelHeight = panel_height_and_resize_bar - 7;
           } else {
             return this.panelHeight = 0;
           }
         }
       },
-      _extend: function() {
-        var strategy;
-        this.orientation = this.orientation || 'horizontal';
-        strategy = this.strategies[this.orientation];
-        this[strategy.name] = true;
-        this._after_push = strategy.after_push;
-        this._begin_resize = strategy.begin_resize;
-        this._finish_resize = strategy.finish_resize;
-        return this._rezise = strategy.rezise;
-      },
-      _on_begin_resize: function(evnt) {
-        var context, _mousemove, _mouseup;
-        evnt.cancelBubble = true;
-        context = {};
-        _mousemove = this._rezise(this, context);
-        _mouseup = (function(_this) {
-          return function(evnt) {
-            if (evnt.which !== 1) {
-              return;
-            }
-            _this._finish_resize(_this, context);
-            document.removeEventListener("mouseup", _mouseup);
-            return document.removeEventListener("mousemove", _mousemove);
-          };
-        })(this);
-        document.addEventListener("mouseup", _mouseup);
-        document.addEventListener("mousemove", _mousemove);
-        return this._begin_resize(this, context, evnt);
-      },
       add: function(element) {
         var next;
         next = document.createElement('gs-panel-simple');
         next.concretElement = element;
-        this._after_push(next, 0);
+        this.__after_push(next, 0);
         return this.push('children', next);
-      },
-      strategies: {
-        horizontal: {
-          name: 'horizontal',
-          after_push: function(element, position) {
-            var amount, children, count, css_width, last_width, real_width, width, _i, _len, _ref;
-            amount = this.children.length + 1;
-            count = 0;
-            width = 100 / amount;
-            _ref = this.children;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              children = _ref[_i];
-              children.style.width = width + '%';
-              css_width = children.style.width;
-              if (/%$/.test(css_width)) {
-                real_width = parseFloat(children.style.width.slice(0, -1));
-              } else {
-                real_width = width;
-              }
-              count += real_width;
-            }
-            last_width = 100 - count;
-            element.style.height = this.panelHeight;
-            return element.style.width = last_width + '%';
-          },
-          begin_resize: function(self, context, evnt) {
-            context.initial_frame_heigth = this.clientHeight;
-            return context.initial_mouse_y = evnt.detail.clientY;
-          },
-          rezise: function(self, context) {
-            return function(evnt) {
-              var nextHeigth, y_delta;
-              y_delta = evnt.clientY - context.initial_mouse_y;
-              console.log('y_delta: ' + y_delta);
-              console.log('initial_frame_heigth: ' + context.initial_frame_heigth);
-              nextHeigth = context.initial_frame_heigth + y_delta;
-              console.log('nextHeigth: ' + nextHeigth);
-              return self.minHeightContainer.style.minHeight = self.panelHeigth = self.style.maxHeight = nextHeigth + 'px';
-            };
-          },
-          finish_resize: function(self, context) {
-            self.minHeightContainer.style.minHeight = "30px";
-            return console.log('height rezise end');
-          }
-        },
-        vertical: {
-          name: 'vertical',
-          after_push: function(element, position) {},
-          begin_resize: function() {},
-          finish_resize: function() {}
-        }
       }
     });
 

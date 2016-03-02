@@ -1,15 +1,8 @@
 :host{
-  background-color: #FEF;
-  width: auto;
-  max-height: 200px;
-  height: 100%;
-  display: block;
-  #minHeightContainer{
-    width: 100%;
-    min-height: 40px;
-    height: auto;
-    .inject-container{
-      height: auto;
-    }
-  }
+  background-color: #BBF;
+  display: flex;
+  flex: 1;
+  // .horizontal{
+    // flex-direction: column;
+  // }
 }

@@ -1,0 +1,34 @@
+:host{
+  align-self: flex-end;
+  &.vertical{
+    display:block;
+    background-color: #0f0;
+    clear: both;
+    height: 7px;
+    width: 100%;
+    text-align: center;
+    overflow-y: hidden;
+    line-height: 0px;
+    cursor: s-resize;
+    .points{
+      height: auto;
+      text-align: center;
+      line-height: 0.3;
+      align-self: center;
+    }
+  }
+  &.horizontal{
+    width: 7px;
+    height: 100%;
+    display: flex;
+    height: 100%;
+    background-color: #0F0;
+    cursor: e-resize;
+    .points{
+      height: auto;
+      text-align: center;
+      line-height: 0.3;
+      align-self: center;
+    }
+  }
+}

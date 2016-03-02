@@ -5,7 +5,7 @@
   .panels-wrapper{
     margin: 20px;
     #gsPanels{
-      min-height: 20px;
+      min-height: 80px;
     }
   }
   .left-block{
@@ -13,6 +13,47 @@
     width: 200px;
     background-color: green;
     float: left;
+  }
+  .class-options{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 0;
+    paper-button{
+      padding-top: 3px;
+      padding-bottom: 0px;
+      margin: 0;
+      iron-icon{
+        margin-top: -5px;
+      }
+    }
+    paper-item{
+      cursor: pointer;
+    }
+    .iron-selected:focus:after,
+    .iron-selected:focus:before{
+      background-color: transparent;
+      opacity: 0;
+    }
+    .red{
+      color: white;
+      background-color: #F20;
+      &:hover{
+        background-color: #F40;
+      }
+    }
+    .green{
+      background-color: #0B0;
+      &:hover{
+        background-color: #0D0;
+      }
+    }
+    .blue{
+      color: white;
+      background-color: #04F;
+      &:hover{
+        background-color: #06F;
+      }
+    }
   }
   
 }

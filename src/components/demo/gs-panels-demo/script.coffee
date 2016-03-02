@@ -8,32 +8,53 @@ Polymer
     mainHeight:
       type: Number
       observer: '_main_height_change'
+    nextClass:
+      type: String
+    nextClassIndex:
+      type: Number
+      value: 0
+      observer: '_next_class_index_change'
+    changeClassAuto:
+      type: Boolean
+      value: true
+    classOptions:
+      type: Array
+      value: ['red', 'green', 'blue']
+    nextName:
+      type: String
+      value: 'Panel Name'
       
   listeners:
-    'panelA.tap': '_add_panel_a'
-    'panelB.tap': '_add_panel_b'
-    'panelC.tap': '_add_panel_c'
+    'panelSimple.tap': '_add_panel_simple'
+    'panelComplex.tap': '_add_panel_complex'
       
   ready:->
+    @nextClass = @classOptions[@nextClassIndex]
     @panels = panels = @$.gsPanels
     
-  _add_panel_a: ->
-    item = document.createElement 'gs-panels-demo-item'
-    item.elementClasses = 'red'
-    item.elementName = 'panel A'
-    @panels.add item
+  _next_class_index_change:->
+    @classOptions and @nextClass = @classOptions[@nextClassIndex]
+      
+  _change_class_index:->
+    if @changeClassAuto
+      nextClassIndex = @nextClassIndex + 1
+      if nextClassIndex >= @classOptions.length
+        nextClassIndex = 0
+      @nextClassIndex = nextClassIndex
     
-  _add_panel_b: ->
+  _add_panel_simple: ->
     item = document.createElement 'gs-panels-demo-item'
-    item.elementClasses = 'green'
-    item.elementName = 'panel B'
+    item.elementClasses = @nextClass
+    item.elementName = @nextName
     @panels.add item
+    @_change_class_index()
     
-  _add_panel_c: ->
-    item = document.createElement 'gs-panels-demo-item'
-    item.elementClasses = 'blue'
-    item.elementName = 'panel C'
+  _add_panel_complex: ->
+    item = document.createElement 'gs-panels-demo-item-flex'
+    item.elementClasses = @nextClass
+    item.elementName = @nextName
     @panels.add item
+    @_change_class_index()
     
   _is_numeric: (value)->
     not isNaN(value) and value isnt ''
@@ -43,7 +64,7 @@ Polymer
       @panels and @panels.style.width = @mainWidth + 'px'
     else
       @panels and @panels.style.width = '100%'
-      
+  
   _main_height_change: ->
     if @_is_numeric(@mainHeight)
       @panels and @panels.style.height = @mainHeight + 'px'

@@ -1,6 +1,14 @@
 <link rel="import" href="../gs-panel-root.html">
 <link rel="import" href="gs-panels-demo-item.html">
+<link rel="import" href="gs-panels-demo-item-flex.html">
+<link rel="import" href="../../../../iron-icon/iron-icon.html">
+<link rel="import" href="../../../../iron-icons/iron-icons.html">
 <link rel="import" href="../../../../iron-input/iron-input.html">
+<link rel="import" href="../../../../paper-menu/paper-menu.html">
+<link rel="import" href="../../../../paper-item/paper-item.html">
+<link rel="import" href="../../../../paper-button/paper-button.html">
+<link rel="import" href="../../../../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../../paper-checkbox/paper-checkbox.html">
 <dom-module id="gs-panels-demo">
   <template>
@@ -12,7 +20,7 @@
         margin: 20px;
       }
       :host .panels-wrapper #gsPanels {
-        min-height: 20px;
+        min-height: 80px;
       }
       :host .left-block {
         height: 200px;
@@ -20,20 +28,76 @@
         background-color: green;
         float: left;
       }
+      :host .class-options {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding: 0;
+      }
+      :host .class-options paper-button {
+        padding-top: 3px;
+        padding-bottom: 0px;
+        margin: 0;
+      }
+      :host .class-options paper-button iron-icon {
+        margin-top: -5px;
+      }
+      :host .class-options paper-item {
+        cursor: pointer;
+      }
+      :host .class-options .iron-selected:focus:after,
+      :host .class-options .iron-selected:focus:before {
+        background-color: transparent;
+        opacity: 0;
+      }
+      :host .class-options .red {
+        color: white;
+        background-color: #F20;
+      }
+      :host .class-options .red:hover {
+        background-color: #F40;
+      }
+      :host .class-options .green {
+        background-color: #0B0;
+      }
+      :host .class-options .green:hover {
+        background-color: #0D0;
+      }
+      :host .class-options .blue {
+        color: white;
+        background-color: #04F;
+      }
+      :host .class-options .blue:hover {
+        background-color: #06F;
+      }
 
     </style>
 
 
 
     <div class="controls">
-      <span>Main Width (0 = 100%): </span><br/>
+      <span>Container Width (0 = 100%): </span><br/>
       <input is="iron-input" bind-value="{{mainWidth}}" /><br/>
-      <span>Main Height (0 = auto, current min-heigth = 20px): </span><br/>
+      <span>Container Height (0 = auto, current min-heigth = 20px): </span><br/>
       <input is="iron-input" bind-value="{{mainHeight}}" /><br/>
       <paper-checkbox checked="{{showLeftBlock}}">Show left block</paper-checkbox><br/>
-      <button id="panelA" >agregar panel a</button>
-      <button id="panelB" >agregar panel b</button>
-      <button id="panelC" >agregar panel b</button><br/>
+      
+      <paper-menu-button class="class-options">
+        <paper-button class$="dropdown-trigger {{nextClass}}" raised>
+          <iron-icon icon="check"></iron-icon>
+          <span>{{nextClass}}</span>
+        </paper-button>
+        <paper-menu class="dropdown-content" selected="{{nextClassIndex}}">
+          <template is="dom-repeat" items="{{classOptions}}">
+            <paper-item class$="{{item}}">{{item}}</paper-item>
+          </template>
+        </paper-menu>
+      </paper-menu-button>
+      <paper-checkbox checked="{{changeClassAuto}}">Change Auto</paper-checkbox><br/>
+      
+      <span>name: </span>
+      <input is="iron-input" bind-value="{{nextName}}" /><br/>
+      <button id="panelSimple" >agregar panel simple</button>
+      <button id="panelComplex" >agregar panel complejo</button>
     </div>
 
     <template is="dom-if" if="{{showLeftBlock}}">
@@ -42,6 +106,7 @@
     <div class="panels-wrapper">
       <gs-panel-root id="gsPanels" debug="true"></gs-panel-root>
     </div>
+    <div class="under">Under panels page control</div>
   </template>
   <script>
     Polymer({
@@ -54,37 +119,65 @@
         mainHeight: {
           type: Number,
           observer: '_main_height_change'
+        },
+        nextClass: {
+          type: String
+        },
+        nextClassIndex: {
+          type: Number,
+          value: 0,
+          observer: '_next_class_index_change'
+        },
+        changeClassAuto: {
+          type: Boolean,
+          value: true
+        },
+        classOptions: {
+          type: Array,
+          value: ['red', 'green', 'blue']
+        },
+        nextName: {
+          type: String,
+          value: 'Panel Name'
         }
       },
       listeners: {
-        'panelA.tap': '_add_panel_a',
-        'panelB.tap': '_add_panel_b',
-        'panelC.tap': '_add_panel_c'
+        'panelSimple.tap': '_add_panel_simple',
+        'panelComplex.tap': '_add_panel_complex'
       },
       ready: function() {
         var panels;
+        this.nextClass = this.classOptions[this.nextClassIndex];
         return this.panels = panels = this.$.gsPanels;
       },
-      _add_panel_a: function() {
-        var item;
-        item = document.createElement('gs-panels-demo-item');
-        item.elementClasses = 'red';
-        item.elementName = 'panel A';
-        return this.panels.add(item);
+      _next_class_index_change: function() {
+        return this.classOptions && (this.nextClass = this.classOptions[this.nextClassIndex]);
       },
-      _add_panel_b: function() {
-        var item;
-        item = document.createElement('gs-panels-demo-item');
-        item.elementClasses = 'green';
-        item.elementName = 'panel B';
-        return this.panels.add(item);
+      _change_class_index: function() {
+        var nextClassIndex;
+        if (this.changeClassAuto) {
+          nextClassIndex = this.nextClassIndex + 1;
+          if (nextClassIndex >= this.classOptions.length) {
+            nextClassIndex = 0;
+          }
+          return this.nextClassIndex = nextClassIndex;
+        }
       },
-      _add_panel_c: function() {
+      _add_panel_simple: function() {
         var item;
         item = document.createElement('gs-panels-demo-item');
-        item.elementClasses = 'blue';
-        item.elementName = 'panel C';
-        return this.panels.add(item);
+        item.elementClasses = this.nextClass;
+        item.elementName = this.nextName;
+        this.panels.add(item);
+        return this._change_class_index();
+      },
+      _add_panel_complex: function() {
+        var item;
+        item = document.createElement('gs-panels-demo-item-flex');
+        item.elementClasses = this.nextClass;
+        item.elementName = this.nextName;
+        this.panels.add(item);
+        return this._change_class_index();
       },
       _is_numeric: function(value) {
         return !isNaN(value) && value !== '';

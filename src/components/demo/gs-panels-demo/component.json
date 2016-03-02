@@ -3,7 +3,15 @@
   "imports": [
     "../gs-panel-root.html",
     "gs-panels-demo-item.html",
+    "gs-panels-demo-item-flex.html",
+    "../../../../iron-icon/iron-icon.html",
+    "../../../../iron-icons/iron-icons.html",
     "../../../../iron-input/iron-input.html",
+    "../../../../paper-menu/paper-menu.html",
+    "../../../../paper-item/paper-item.html",
+    "../../../../paper-button/paper-button.html",
+    "../../../../paper-menu-button/paper-menu-button.html",
+    "../../../../paper-icon-button/paper-icon-button.html",
     "../../../../paper-checkbox/paper-checkbox.html"
   ]
 }
