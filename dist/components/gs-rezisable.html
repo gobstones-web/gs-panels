@@ -1,3 +1,4 @@
+<link rel="import" href="gs-events.html">
 <dom-module id="gs-rezisable">
   <template>
     <style>
@@ -15,39 +16,67 @@
       properties: {
         parentOrientation: {
           type: String
+        },
+        notLast: {
+          type: Boolean,
+          observer: '_not_last_change'
         }
       },
-      listeners: {
-        'begin-resize': '__on_begin_resize'
-      },
+      listeners: (function() {
+        var listeners;
+        listeners = {};
+        listeners[GS.EVENTS.RESIZE_BEGIN] = '__on_begin_resize';
+        return listeners;
+      })(),
       HORIZONTAL: 'horizontal',
       VERTICAL: 'vertical',
+      NOT_LAST_CLASS: 'not-last',
+      molt: function(elem) {
+        return window.getComputedStyle(elem);
+      },
       parse_px: function(in_px) {
         var value;
         if (/px$/.test(in_px)) {
           value = parseFloat(in_px.slice(0, -2));
         } else {
           console.log('Error in px parsing. Receives: ' + in_px);
+          value = in_px;
         }
         return value;
       },
-      ready: function() {
-        return this.__make_resizable();
+      parse_percent: function(in_percent) {
+        var value;
+        if (/\%$/.test(in_percent)) {
+          value = parseFloat(in_percent.slice(0, -1));
+        } else {
+          console.log('Error in % parsing. Receives: ' + in_percent);
+          value = in_percent;
+        }
+        return value;
       },
-      __make_resizable: function() {
-        var ori;
-        ori = this.parentOrientation = this.parentOrientation || this.HORIZONTAL;
-        this.extend(this, this.strategies[ori]);
-        return this[ori] = true;
+      _not_last_change: function() {
+        if (this.notLast) {
+          return this.classList.add(this.NOT_LAST_CLASS);
+        } else {
+          return this.classList.remove(this.NOT_LAST_CLASS);
+        }
+      },
+      ready: function() {
+        this.parentOrientation = this.parentOrientation || this.HORIZONTAL;
+        return this.classList.add('child-of-' + this.parentOrientation);
       },
       __on_begin_resize: function(evnt) {
         var context, mousemove, mouseup;
         evnt.cancelBubble = true;
         evnt.preventDefault();
-        context = {};
+        context = {
+          item: this
+        };
         mousemove = (function(_this) {
           return function(evnt) {
-            return _this.__rezise(context, evnt);
+            evnt.cancelBubble = true;
+            evnt.preventDefault();
+            return _this.resize(context, evnt);
           };
         })(this);
         mouseup = (function(_this) {
@@ -57,70 +86,41 @@
             }
             evnt.cancelBubble = true;
             evnt.preventDefault();
-            _this.__finish_resize(context);
+            _this.finish_resize(context, evnt);
             document.removeEventListener("mousemove", mousemove);
             return document.removeEventListener("mouseup", mouseup);
           };
         })(this);
         document.addEventListener("mouseup", mouseup);
         document.addEventListener("mousemove", mousemove);
-        return this.__begin_resize(context, evnt);
+        return this.begin_resize(context, evnt);
       },
-      strategies: {
-        vertical: {
-          __after_push: function(element, position) {},
-          __begin_resize: function(context, evnt) {
-            if (this.begin_resize && !this.begin_resize(context, evnt)) {
-              return;
-            }
-            context.initial_frame_heigth = this.clientHeight;
-            context.initial_mouse_y = evnt.detail.clientY;
-            return this.style.transition = 'none';
-          },
-          __rezise: function(context, evnt) {
-            var nextHeight, y_delta;
-            evnt.cancelBubble = true;
-            evnt.preventDefault();
-            if (this.resize && !this.resize(context, evnt)) {
-              return;
-            }
-            y_delta = evnt.clientY - context.initial_mouse_y;
-            nextHeight = context.initial_frame_heigth + y_delta;
-            return this.style.minHeight = nextHeight + 'px';
-          },
-          __finish_resize: function(context) {
-            if (this.finish_resize && !this.finish_resize(context)) {
-              return;
-            }
-            this.style.minHeight = "40px";
-            return this.style.transition = '0.5s';
+      begin_resize: function(context, native_event) {
+        return this.fire(GS.EVENTS.CHILD_RESIZE_BEGIN, {
+          context: context,
+          position: {
+            clientX: native_event.detail.clientX,
+            clientY: native_event.detail.clientY
           }
-        },
-        horizontal: {
-          __after_push: function(element) {
-            var amount, children, count, css_width, last_width, real_width, width, _i, _len, _ref;
-            amount = this.children.length + 1;
-            count = 0;
-            width = 100 / amount;
-            _ref = this.children;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              children = _ref[_i];
-              children.style.width = width + '%';
-              css_width = children.style.width;
-              if (/%$/.test(css_width)) {
-                real_width = parseFloat(children.style.width.slice(0, -1));
-              } else {
-                real_width = width;
-              }
-              count += real_width;
-            }
-            last_width = 100 - count;
-            return element.style.width = last_width + '%';
-          },
-          __begin_resize: function() {},
-          __finish_resize: function() {},
-          __rezise: function() {}
-        }
+        });
+      },
+      resize: function(context, polymer_event) {
+        return this.fire(GS.EVENTS.CHILD_RESIZE, {
+          context: context,
+          position: {
+            clientX: polymer_event.clientX,
+            clientY: polymer_event.clientY
+          }
+        });
+      },
+      finish_resize: function(context, polymer_event) {
+        return this.fire(GS.EVENTS.CHILD_RESIZE_FINISH, {
+          context: context,
+          position: {
+            clientX: polymer_event.clientX,
+            clientY: polymer_event.clientY
+          }
+        });
       }
     };
 

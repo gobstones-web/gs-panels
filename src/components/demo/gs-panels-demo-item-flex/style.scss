@@ -1,8 +1,18 @@
 :host{
   min-width: 50px;
   min-height: 50px;
-  display: flex;
-  flex: 1;
+  display: block;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  .inline-content{
+    .name{
+      font-size: 30px;
+    }
+    display: block;
+    overflow: hidden;
+  }
   &.red{
     background-color: red;
     color: white;
@@ -14,59 +24,43 @@
   &.green{
     background-color: #0D0;
   }
-  .name{
-    font-size: 30px;
-  }
-  .inline-content{
+  .top,
+  .bottom{
     display: block;
-    overflow: hidden;
-  }
-  .left,
-  .right,
-  .center{
-    display: flex;
-  }
-  .left{
-    width: 10px;
-    float: left;
+    height: 10px;
+    width: 100%;
     background-color: #34F;
-    //align-self: flex-start;
+    position: absolute;
   }
-  .right{
-    width: 10px;
-    float: right;
-    background-color: #F43;
-    //align-self: flex-end;
+  .top{
+    top:0;
   }
-  .center-container{
-    flex:1;
-    display:flex;
-    flex-flow: column;
-    .center{
-      flex:1;
-      display:flex;
+  .bottom{
+    bottom:0;
+  }
+  .center{
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: transparent;
+    .left,
+    .right{
+      top:0;
+      width: 10px;
+      height: 100%;
+      position: absolute;
+      background-color: #05F;
+    }
+    .left{
+      left: 0;
+    }
+    .right{
+      right: 0;
+    }
+    .content{
+      width: 100%;
       background-color: transparent;
-      flex-flow: column;
-      .bottom,
-      .top{
-        height: 10px;
-        display: flex;
-        width: 100%
-      }
-      .content{
-        flex:1;
-        width: 100%;
-        background-color: transparent;
-        overflow: hidden;
-      }
-      .bottom{
-        background-color: #05F;
-        align-self: flex-end;
-      }
-      .top{
-        background-color: #F50;
-        align-self: flex-start;
-      }
+      overflow: hidden;
     }
   }
 }

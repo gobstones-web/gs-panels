@@ -4,6 +4,7 @@
     "gs-panel-simple.html",
     "gs-panel-resize.html",
     "gs-rezisable.html",
+    "gs-events.html",
     "../../../gs-common/dist/components/dom-inject.html"
   ]
 }

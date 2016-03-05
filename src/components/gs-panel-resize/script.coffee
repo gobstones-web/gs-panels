@@ -6,7 +6,7 @@ Polymer
 
   _mousedown:(evnt)->
     unless evnt.which is 1 then return 
-    @fire 'begin-resize',
+    @fire GS.EVENTS.RESIZE_BEGIN,
       clientX: evnt.clientX
       clientY: evnt.clientY
     

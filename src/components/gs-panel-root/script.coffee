@@ -57,12 +57,13 @@ Polymer
     else
       @container.classList.remove 'debug'
         
-  molt:(elem)->
-    window.getComputedStyle(elem)
-        
   begin_resize:(context, evnt)->
     context.minHeightPX = @molt(@fixer).minHeight
     context.reziserHeight = @reziser.clientHeight
+    context.initial_frame_heigth = @clientHeight
+    context.initial_mouse_y = evnt.detail.clientY
+    @style.transition = 'none'
+    false
         
   resize:(context, evnt)->
     y_delta = evnt.clientY - context.initial_mouse_y
@@ -71,12 +72,10 @@ Polymer
       @childHeight = (nextHeight - context.reziserHeight)
       @fixer.style.minHeight = @childHeight + 'px'
       @style.maxHeight = nextHeight + 'px'
-    false
     
-  finish_resize:(context)->
+  finish_resize:(context, evnt)->
     @fixer.style.minHeight = context.minHeightPX
-    @style.transition = '0.5s';
-    false
+    @style.transition = '0.5s'
   
   add: (element, path)->
     path = path or '0'

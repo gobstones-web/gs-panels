@@ -25,7 +25,7 @@
       >
       </gs-panel-composite>
     </div>
-    <gs-panel-resize id="panelReziser" class="vertical"></gs-panel-resize>
+    <gs-panel-resize id="panelReziser" class="vertical main"></gs-panel-resize>
 
   </template>
   <script>
@@ -94,12 +94,13 @@
           return this.container.classList.remove('debug');
         }
       },
-      molt: function(elem) {
-        return window.getComputedStyle(elem);
-      },
       begin_resize: function(context, evnt) {
         context.minHeightPX = this.molt(this.fixer).minHeight;
-        return context.reziserHeight = this.reziser.clientHeight;
+        context.reziserHeight = this.reziser.clientHeight;
+        context.initial_frame_heigth = this.clientHeight;
+        context.initial_mouse_y = evnt.detail.clientY;
+        this.style.transition = 'none';
+        return false;
       },
       resize: function(context, evnt) {
         var nextHeight, y_delta;
@@ -108,14 +109,12 @@
         if (nextHeight > this.minHeightSupported) {
           this.childHeight = nextHeight - context.reziserHeight;
           this.fixer.style.minHeight = this.childHeight + 'px';
-          this.style.maxHeight = nextHeight + 'px';
+          return this.style.maxHeight = nextHeight + 'px';
         }
-        return false;
       },
-      finish_resize: function(context) {
+      finish_resize: function(context, evnt) {
         this.fixer.style.minHeight = context.minHeightPX;
-        this.style.transition = '0.5s';
-        return false;
+        return this.style.transition = '0.5s';
       },
       add: function(element, path) {
         path = path || '0';

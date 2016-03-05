@@ -1,15 +1,22 @@
 :host{
   background-color: #BBF;
-  display: flex;
-  flex: 1;
+  display: block;
+  float: left;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  &.not-last{
+    &.child-of-vertical{
+      padding-bottom: 7px;
+    }
+    &.child-of-horizontal{
+      padding-right: 7px;
+    }
+  }
   .vertical{
-    flex-direction: column;
+    
   }
   .horizontal{
     
-  }
-  > #container{
-    display: flex;
-    flex: 1;
   }
 }

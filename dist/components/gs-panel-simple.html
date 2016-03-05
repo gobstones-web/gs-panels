@@ -4,20 +4,27 @@
   <template>
     <style>
       :host {
-        display: flex;
-        flex: 1;
+        display: block;
         overflow: hidden;
         overflow-x: hidden;
         overflow-y: hidden;
-        min-width: 150px;
+        float: left;
+        position: relative;
+        box-sizing: border-box;
+      }
+      :host.not-last.child-of-vertical {
+        padding-bottom: 7px;
+      }
+      :host.not-last.child-of-horizontal {
+        padding-right: 7px;
       }
 
     </style>
 
-    <template is="dom-inject" element="{{concretElement}}"></template>
     <template is="dom-if" if="{{notLast}}">
       <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
+    <template is="dom-inject" element="{{concretElement}}"></template>
 
   </template>
   <script>
@@ -30,12 +37,14 @@
         panelHeight: {
           type: Number,
           observer: '_panel_height_change'
+        },
+        index: {
+          type: Number
         }
       },
       behaviors: [GS.Rezisable],
       ready: function() {
-        this.container = this.$.container;
-        return this.classList.add('child-of-' + this.parentOrientation);
+        return this.container = this.$.container;
       },
       _panel_height_change: function() {
         this.clientHeight = this.panelHeight + 'px';

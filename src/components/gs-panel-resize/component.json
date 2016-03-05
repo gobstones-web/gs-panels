@@ -1,4 +1,4 @@
 {
   "name": "gs-panel-resize",
-  "imports": []
+  "imports": ["gs-events.html"]
 }

@@ -1,7 +1,7 @@
 :host{
-  //align-self: flex-end;
+  position: absolute;
+  display: block;
   &.vertical{
-    display:block;
     background-color: #0f0;
     clear: both;
     height: 7px;
@@ -17,15 +17,24 @@
     }
   }
   &.horizontal{
+    text-align: center;
+    top:0;
+    right:0;
     width: 7px;
-    display: flex;
+    height: 100%;
+    display: block;
     background-color: #0F0;
     cursor: e-resize;
     .points{
-      height: auto;
+      position: absolute;
+      top: 50%;
+      margin-top: -6px;
+      display: block;
       text-align: center;
       line-height: 0.3;
-      align-self: center;
     }
+  }
+  &.main{
+    position: relative;
   }
 }

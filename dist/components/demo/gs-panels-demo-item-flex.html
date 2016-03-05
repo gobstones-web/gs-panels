@@ -4,8 +4,18 @@
       :host {
         min-width: 50px;
         min-height: 50px;
-        display: flex;
-        flex: 1;
+        display: block;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+        position: relative;
+      }
+      :host .inline-content {
+        display: block;
+        overflow: hidden;
+      }
+      :host .inline-content .name {
+        font-size: 30px;
       }
       :host.red {
         background-color: red;
@@ -18,86 +28,69 @@
       :host.green {
         background-color: #0D0;
       }
-      :host .name {
-        font-size: 30px;
-      }
-      :host .inline-content {
+      :host .top,
+      :host .bottom {
         display: block;
-        overflow: hidden;
-      }
-      :host .left,
-      :host .right,
-      :host .center {
-        display: flex;
-      }
-      :host .left {
-        width: 10px;
-        float: left;
-        background-color: #34F;
-      }
-      :host .right {
-        width: 10px;
-        float: right;
-        background-color: #F43;
-      }
-      :host .center-container {
-        flex: 1;
-        display: flex;
-        flex-flow: column;
-      }
-      :host .center-container .center {
-        flex: 1;
-        display: flex;
-        background-color: transparent;
-        flex-flow: column;
-      }
-      :host .center-container .center .bottom,
-      :host .center-container .center .top {
         height: 10px;
-        display: flex;
         width: 100%;
+        background-color: #34F;
+        position: absolute;
       }
-      :host .center-container .center .content {
-        flex: 1;
+      :host .top {
+        top: 0;
+      }
+      :host .bottom {
+        bottom: 0;
+      }
+      :host .center {
+        height: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: transparent;
+      }
+      :host .center .left,
+      :host .center .right {
+        top: 0;
+        width: 10px;
+        height: 100%;
+        position: absolute;
+        background-color: #05F;
+      }
+      :host .center .left {
+        left: 0;
+      }
+      :host .center .right {
+        right: 0;
+      }
+      :host .center .content {
         width: 100%;
         background-color: transparent;
         overflow: hidden;
-      }
-      :host .center-container .center .bottom {
-        background-color: #05F;
-        align-self: flex-end;
-      }
-      :host .center-container .center .top {
-        background-color: #F50;
-        align-self: flex-start;
       }
 
     </style>
 
-    <div class="left">
-      <div class="top"></div>
-      <div class="bottom"></div>
-      
+    <div class="top">
+      <div class="left"></div>
+      <div class="right"></div>
     </div>
-    <div class="center-container">
-      <div class="center">
-        <div class="top"></div>
-        <div class="content">
-          <div class="inline-content">
-            <p class="name">{{elementName}}</p>
-            <p>
-              <template is="dom-iterate" from="0" to="{{lines}}">
-                line: <span>{{index}}</span>  complex panel<br/>
-              </template>
-            </p>
-          </div>
+    <div class="center">
+      <div class="left"></div>
+      <div class="content">
+        <div class="inline-content">
+          <p class="name">{{elementName}}</p>
+          <p>
+            <template is="dom-iterate" from="0" to="{{lines}}">
+              line: <span>{{index}}</span>  complex panel<br/>
+            </template>
+          </p>
         </div>
-        <div class="bottom"></div>
       </div>
+      <div class="right"></div>
     </div>
-    <div class="right">
-      <div class="top"></div>
-      <div class="bottom"></div>
+    <div class="bottom">
+      <div class="left"></div>
+      <div class="right"></div>
     </div>
 
   </template>

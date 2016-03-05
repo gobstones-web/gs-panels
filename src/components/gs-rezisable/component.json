@@ -1,4 +1,4 @@
 {
   "name": "gs-rezisable",
-  "imports": []
+  "imports": ["gs-events.html"]
 }

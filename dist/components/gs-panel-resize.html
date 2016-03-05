@@ -1,8 +1,12 @@
+<link rel="import" href="gs-events.html">
 <dom-module id="gs-panel-resize">
   <template>
     <style>
-      :host.vertical {
+      :host {
+        position: absolute;
         display: block;
+      }
+      :host.vertical {
         background-color: #0f0;
         clear: both;
         height: 7px;
@@ -16,16 +20,25 @@
         letter-spacing: -3px;
       }
       :host.horizontal {
+        text-align: center;
+        top: 0;
+        right: 0;
         width: 7px;
-        display: flex;
+        height: 100%;
+        display: block;
         background-color: #0F0;
         cursor: e-resize;
       }
       :host.horizontal .points {
-        height: auto;
+        position: absolute;
+        top: 50%;
+        margin-top: -6px;
+        display: block;
         text-align: center;
         line-height: 0.3;
-        align-self: center;
+      }
+      :host.main {
+        position: relative;
       }
 
     </style>
@@ -47,7 +60,7 @@
         if (evnt.which !== 1) {
           return;
         }
-        return this.fire('begin-resize', {
+        return this.fire(GS.EVENTS.RESIZE_BEGIN, {
           clientX: evnt.clientX,
           clientY: evnt.clientY
         });
