@@ -1,7 +1,7 @@
 Polymer
   is: '#GRUNT_COMPONENT_NAME'
   
-  properties: 
+  properties:
     debug:
       type: Object
       value: false
@@ -11,7 +11,8 @@ Polymer
       value: GS.Rezisable.VERTICAL
     mainOrientation:
       type: String
-      value: GS.Rezisable.HORIZONTAL
+      value: GS.Rezisable.VERTICAL
+      #value: GS.Rezisable.HORIZONTAL
     rootHeight:
       type: Number
     childHeight:
@@ -49,6 +50,7 @@ Polymer
     
   child_height_change:->
     @fixer.style.maxHeight = @childHeight + 'px';
+    @main.panelHeight = @childHeight
     
   _debug_change: ->
     unless @container then return
@@ -56,14 +58,13 @@ Polymer
       @container.classList.add 'debug'
     else
       @container.classList.remove 'debug'
-        
+    
   begin_resize:(context, evnt)->
     context.minHeightPX = @molt(@fixer).minHeight
     context.reziserHeight = @reziser.clientHeight
     context.initial_frame_heigth = @clientHeight
     context.initial_mouse_y = evnt.detail.clientY
     @style.transition = 'none'
-    false
         
   resize:(context, evnt)->
     y_delta = evnt.clientY - context.initial_mouse_y

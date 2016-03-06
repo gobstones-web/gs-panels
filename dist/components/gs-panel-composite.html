@@ -14,40 +14,48 @@
         position: relative;
         box-sizing: border-box;
       }
-      :host.not-last.child-of-vertical {
+      :host.child-of-vertical {
+        width: 100%;
+      }
+      :host.child-of-vertical.not-last {
         padding-bottom: 7px;
       }
-      :host.not-last.child-of-horizontal {
+      :host.child-of-horizontal.not-last {
         padding-right: 7px;
       }
 
     </style>
 
-    <template is="dom-if" if="{{notLast}}">
-      <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
-    </template>
     <template is="dom-repeat" items="{{children}}" as="child">
       <template is="dom-inject" element="{{child}}"></template>
+    </template>
+    <template is="dom-if" if="{{notLast}}">
+      <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
   </template>
   <script>
     Polymer({
       is: 'gs-panel-composite',
       MIN_WIDTH: 150,
+      MIN_HEIGHT: 100,
       properties: {
         children: {
-          type: Array
+          type: Array,
+          value: []
         },
-        panelHeight: {
+        panelWidth: {
           type: Number,
-          value: 0
+          value: 100,
+          observer: '_panel_width_change'
         },
         orientation: {
           type: String
         }
       },
       behaviors: [GS.Rezisable],
-      observers: ['_update(children.*, panelHeight)'],
+      __fresh: true,
+      INITIAL_HEIGHT: 400,
+      observers: ['_children_change(children.*)'],
       listeners: (function() {
         var listeners;
         listeners = {};
@@ -68,13 +76,13 @@
         evnt.cancelBubble = true;
         return this.__child_resize_finish(evnt.detail.context, evnt.detail.position);
       },
-      ready: function() {
-        this.children = [];
+      ready: function() {},
+      attached: function() {
         this.orientation = this.orientation || GS.HORIZONTAL;
         this.classList.add(this.orientation);
         return this.extend(this, this.flow_strategies[this.orientation]);
       },
-      _update: function() {
+      _children_change: function() {
         var child, index, last_index, _i, _len, _ref, _results;
         if (this.children.length > 0) {
           this.style.height = this.panelHeight + 'px';
@@ -87,7 +95,6 @@
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           child = _ref[index];
           child.index = index;
-          child.panelHeight = this.panelHeight;
           _results.push(child.notLast = index !== last_index);
         }
         return _results;
@@ -101,12 +108,8 @@
         this._after_push(next, 0);
         return this.push('children', next);
       },
-      parse_percent_width: function(child) {
-        return this.parse_percent(child.style.width);
-      },
-      __set_width_percent: function(child, percent) {
-        child.style.width = percent + '%';
-        return child.resize_data.width = this.parse_percent_width(child);
+      _panel_width_change: function() {
+        return this.__set_width_percent(this.panelWidth);
       },
       flow_strategies: {
         horizontal: {
@@ -118,11 +121,12 @@
             _ref = this.children;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
-              this.__set_width_percent(child, average);
+              child.panelWidth = average;
               count += child.resize_data.width;
             }
             last_width = 100 - count;
-            return this.__set_width_percent(element, last_width);
+            element.panelWidth = last_width;
+            return element.panelHeight = this.panelHeight;
           },
           __child_resize_begin: function(context, position) {
             var next_item;
@@ -132,19 +136,6 @@
             next_item = this.children[context.item.index + 1];
             context.max_width = context.item.clientWidth + next_item.clientWidth - this.MIN_WIDTH;
             return context.item.style.transition = 'none';
-          },
-          __fix_width_against: function(fix_item) {
-            var child, count, _i, _len, _ref;
-            count = 0;
-            _ref = this.children;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              child = _ref[_i];
-              if (child === fix_item) {
-                continue;
-              }
-              count += child.resize_data.width;
-            }
-            return this.__set_width_percent(fix_item, 100 - count);
           },
           __child_resize: function(context, position) {
             var next_percent, next_px, width, x_delta;
@@ -158,15 +149,101 @@
               next_px = this.MIN_WIDTH;
             }
             next_percent = context.initial_width_percent * next_px / context.initial_width;
-            this.__set_width_percent(context.item, next_percent);
-            return this.__fix_width_against(this.children[context.item.index + 1], context.item);
+            context.item.panelWidth = next_percent;
+            return this.__fix_width_against(this.children[context.item.index + 1]);
           },
           __child_resize_finish: function(context, position) {
             return context.item.style.transition = '0.5s';
+          },
+          __fix_width_against: function(fix_item) {
+            var child, count, _i, _len, _ref;
+            count = 0;
+            _ref = this.children;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              if (child === fix_item) {
+                continue;
+              }
+              count += child.resize_data.width;
+            }
+            return fix_item.panelWidth = 100 - count;
           }
         },
         vertical: {
-          _after_push: function(element) {}
+          _after_push: function(element) {
+            var amount, average, child, count, last_height, total, _i, _len, _ref;
+            amount = this.children.length + 1;
+            count = 0;
+            total = this.fixedHeight;
+            average = total / amount;
+            _ref = this.children;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              child.panelHeight = average;
+              count += child.resize_data.height;
+            }
+            last_height = total - count;
+            return element.panelHeight = last_height;
+          },
+          __child_resize_begin: function(context, position) {
+            var next_item;
+            context.initial_mouse_y = position.clientY;
+            context.initial_height = context.item.clientHeight;
+            context.initial_height_px = this.parse_px(context.item.style.height);
+            next_item = this.children[context.item.index + 1];
+            context.max_height = context.item.clientHeight + next_item.clientHeight - this.MIN_HEIGTH;
+            return context.item.style.transition = 'none';
+          },
+          __child_resize: function(context, position) {
+            var height, next_percent, next_px, x_delta;
+            height = this.clientHeight;
+            x_delta = position.clientY - context.initial_mouse_y;
+            next_px = context.initial_height + x_delta;
+            if (next_px > context.max_height) {
+              next_px = context.max_height;
+            }
+            if (next_px < this.MIN_HEIGHT) {
+              next_px = this.MIN_HEIGHT;
+            }
+            next_percent = context.initial_height_px * next_px / context.initial_height;
+            context.item.panelHeight = next_percent;
+            return this.__fix_height_against(this.children[context.item.index + 1]);
+          },
+          __fix_height_against: function(fix_item) {
+            var child, count, _i, _len, _ref;
+            count = 0;
+            _ref = this.children;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              if (child === fix_item) {
+                continue;
+              }
+              count += child.resize_data.height;
+            }
+            return fix_item.panelHeight = this.fixedHeight - count;
+          },
+          __child_resize_finish: function(context, position) {},
+          __propagate_height_change: function() {
+            var amount, average, child, count, last_height, last_item, total, _i, _len, _ref;
+            amount = this.children.length;
+            if (amount > 0) {
+              last_item = this.children[amount - 1];
+              count = 0;
+              total = this.fixedHeight;
+              average = total / amount;
+              _ref = this.children;
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                child = _ref[_i];
+                if (child === last_item) {
+                  continue;
+                }
+                child.panelHeight = average;
+                count += child.resize_data.height;
+              }
+              last_height = total - count;
+              return last_item.panelHeight = last_height;
+            }
+          }
         }
       }
     });

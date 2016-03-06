@@ -12,19 +12,22 @@
         position: relative;
         box-sizing: border-box;
       }
-      :host.not-last.child-of-vertical {
+      :host.child-of-vertical {
+        width: 100%;
+      }
+      :host.child-of-vertical.not-last {
         padding-bottom: 7px;
       }
-      :host.not-last.child-of-horizontal {
+      :host.child-of-horizontal.not-last {
         padding-right: 7px;
       }
 
     </style>
 
+    <template is="dom-inject" element="{{concretElement}}"></template>
     <template is="dom-if" if="{{notLast}}">
       <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
-    <template is="dom-inject" element="{{concretElement}}"></template>
 
   </template>
   <script>
@@ -34,10 +37,6 @@
         concretElement: {
           type: Object
         },
-        panelHeight: {
-          type: Number,
-          observer: '_panel_height_change'
-        },
         index: {
           type: Number
         }
@@ -46,9 +45,18 @@
       ready: function() {
         return this.container = this.$.container;
       },
-      _panel_height_change: function() {
-        this.clientHeight = this.panelHeight + 'px';
-        return this.concretElement.style.height = this.panelHeight + 'px';
+      attached: function() {
+        return this.__propagate_height_change();
+      },
+      __propagate_height_change: function() {
+        if (this.concretElement) {
+          return this.concretElement.style.height = this.fixedHeight + 'px';
+        } else {
+          return console.log('skiping height propagation before attach');
+        }
+      },
+      _panel_width_change: function() {
+        return this.__set_width_percent(this.panelWidth);
       }
     });
 

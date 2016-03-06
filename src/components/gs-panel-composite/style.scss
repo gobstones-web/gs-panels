@@ -5,11 +5,14 @@
   width: 100%;
   position: relative;
   box-sizing: border-box;
-  &.not-last{
-    &.child-of-vertical{
+  &.child-of-vertical{
+    width: 100%;
+    &.not-last{
       padding-bottom: 7px;
     }
-    &.child-of-horizontal{
+  }
+  &.child-of-horizontal{
+    &.not-last{
       padding-right: 7px;
     }
   }

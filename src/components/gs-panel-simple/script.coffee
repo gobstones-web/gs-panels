@@ -4,9 +4,6 @@ Polymer
   properties:
     concretElement:
       type: Object
-    panelHeight:
-      type: Number
-      observer: '_panel_height_change'
     index:
       type: Number
 
@@ -14,9 +11,16 @@ Polymer
   
   ready: ->
     @container = @$.container
-  
-  _panel_height_change:->
-    @clientHeight = @panelHeight + 'px'
-    @concretElement.style.height = @panelHeight + 'px'
-  
     
+  attached: ->
+    @__propagate_height_change()
+    
+  __propagate_height_change: ->
+    if @concretElement 
+      @concretElement.style.height = @fixedHeight + 'px'
+    else
+      console.log 'skiping height propagation before attach'
+  
+  _panel_width_change: ->
+    @__set_width_percent @panelWidth
+

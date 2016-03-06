@@ -7,10 +7,16 @@ GS.Rezisable =
   properties: 
     parentOrientation:
       type: String
-      
+    fixedHeight:
+      type: Number 
+      value: 0
+      observer: '__fixed_height_change'
+    panelHeight:
+      type: Number
+      observer: '__panel_height_change'
     notLast:
       type: Boolean
-      observer: '_not_last_change'
+      observer: '__not_last_change'
   
   listeners: do ->
     listeners = {}
@@ -20,6 +26,9 @@ GS.Rezisable =
   HORIZONTAL: 'horizontal'
   VERTICAL: 'vertical'
   NOT_LAST_CLASS: 'not-last'
+  
+  created: ->
+    @resize_data = {}
   
   molt:(elem)-> window.getComputedStyle(elem)
   
@@ -39,13 +48,37 @@ GS.Rezisable =
       value = in_percent
     value
     
-  _not_last_change:->
+  __not_last_change:->
     if @notLast
       @classList.add @NOT_LAST_CLASS
     else
       @classList.remove @NOT_LAST_CLASS
+    @__update_fixed_height()
+  
+  __update_fixed_height: ->
+    if @parentOrientation is GS.VERTICAL and @notLast
+      @fixedHeight = @panelHeight - 7
+    else
+      @fixedHeight = @panelHeight
+  
+  __panel_height_change: ->
+    @__set_height_px @panelHeight
+    @__update_fixed_height()
+
+  __propagate_height_change: ->
     
-  ready: ->
+  __fixed_height_change: ->
+    @__propagate_height_change()
+  
+  __set_width_percent: (percent)->
+    @style.width = percent + '%'
+    @resize_data.width = @parse_percent @style.width
+    
+  __set_height_px: (in_px)->
+    @style.height = in_px + 'px'
+    @resize_data.height = @parse_px @style.height
+    
+  attached: ->
     @parentOrientation = @parentOrientation or @HORIZONTAL
     @classList.add 'child-of-' + @parentOrientation
     
@@ -88,7 +121,3 @@ GS.Rezisable =
       position:
         clientX: polymer_event.clientX
         clientY: polymer_event.clientY
-    
-
-
-

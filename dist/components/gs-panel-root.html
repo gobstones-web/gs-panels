@@ -43,7 +43,7 @@
         },
         mainOrientation: {
           type: String,
-          value: GS.Rezisable.HORIZONTAL
+          value: GS.Rezisable.VERTICAL
         },
         rootHeight: {
           type: Number
@@ -82,7 +82,8 @@
         return this.style.maxHeight = maxHeight;
       },
       child_height_change: function() {
-        return this.fixer.style.maxHeight = this.childHeight + 'px';
+        this.fixer.style.maxHeight = this.childHeight + 'px';
+        return this.main.panelHeight = this.childHeight;
       },
       _debug_change: function() {
         if (!this.container) {
@@ -99,8 +100,7 @@
         context.reziserHeight = this.reziser.clientHeight;
         context.initial_frame_heigth = this.clientHeight;
         context.initial_mouse_y = evnt.detail.clientY;
-        this.style.transition = 'none';
-        return false;
+        return this.style.transition = 'none';
       },
       resize: function(context, evnt) {
         var nextHeight, y_delta;

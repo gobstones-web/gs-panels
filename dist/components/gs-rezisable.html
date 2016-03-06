@@ -17,9 +17,18 @@
         parentOrientation: {
           type: String
         },
+        fixedHeight: {
+          type: Number,
+          value: 0,
+          observer: '__fixed_height_change'
+        },
+        panelHeight: {
+          type: Number,
+          observer: '__panel_height_change'
+        },
         notLast: {
           type: Boolean,
-          observer: '_not_last_change'
+          observer: '__not_last_change'
         }
       },
       listeners: (function() {
@@ -31,6 +40,9 @@
       HORIZONTAL: 'horizontal',
       VERTICAL: 'vertical',
       NOT_LAST_CLASS: 'not-last',
+      created: function() {
+        return this.resize_data = {};
+      },
       molt: function(elem) {
         return window.getComputedStyle(elem);
       },
@@ -54,14 +66,38 @@
         }
         return value;
       },
-      _not_last_change: function() {
+      __not_last_change: function() {
         if (this.notLast) {
-          return this.classList.add(this.NOT_LAST_CLASS);
+          this.classList.add(this.NOT_LAST_CLASS);
         } else {
-          return this.classList.remove(this.NOT_LAST_CLASS);
+          this.classList.remove(this.NOT_LAST_CLASS);
+        }
+        return this.__update_fixed_height();
+      },
+      __update_fixed_height: function() {
+        if (this.parentOrientation === GS.VERTICAL && this.notLast) {
+          return this.fixedHeight = this.panelHeight - 7;
+        } else {
+          return this.fixedHeight = this.panelHeight;
         }
       },
-      ready: function() {
+      __panel_height_change: function() {
+        this.__set_height_px(this.panelHeight);
+        return this.__update_fixed_height();
+      },
+      __propagate_height_change: function() {},
+      __fixed_height_change: function() {
+        return this.__propagate_height_change();
+      },
+      __set_width_percent: function(percent) {
+        this.style.width = percent + '%';
+        return this.resize_data.width = this.parse_percent(this.style.width);
+      },
+      __set_height_px: function(in_px) {
+        this.style.height = in_px + 'px';
+        return this.resize_data.height = this.parse_px(this.style.height);
+      },
+      attached: function() {
         this.parentOrientation = this.parentOrientation || this.HORIZONTAL;
         return this.classList.add('child-of-' + this.parentOrientation);
       },

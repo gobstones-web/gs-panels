@@ -31,7 +31,7 @@ Polymer
   ready:->
     @nextClass = @classOptions[@nextClassIndex]
     @panels = panels = @$.gsPanels
-    
+  
   _next_class_index_change:->
     @classOptions and @nextClass = @classOptions[@nextClassIndex]
       
