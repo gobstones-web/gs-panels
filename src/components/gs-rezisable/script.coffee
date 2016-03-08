@@ -9,9 +9,12 @@ GS.Rezisable =
       type: String
     parentOrientation:
       type: String
+    panelWidth:
+      type: Number 
+      value: 100
+      observer: '__panel_width_change'
     fixedHeight:
       type: Number 
-      value: 0
       observer: '__fixed_height_change'
     panelHeight:
       type: Number
@@ -63,14 +66,20 @@ GS.Rezisable =
     else
       @fixedHeight = @panelHeight
   
+  __fixed_height_change: ->
+    @__propagate_height_change()
+    
+  __propagate_height_change: ->
+    
   __panel_height_change: ->
     @__set_height_px @panelHeight
     @__update_fixed_height()
-
-  __propagate_height_change: ->
     
-  __fixed_height_change: ->
-    @__propagate_height_change()
+  __propagate_width_change: ->
+    
+  __panel_width_change: ->
+    @__set_width_percent @panelWidth
+    @__propagate_width_change()
   
   __set_width_percent: (percent)->
     @style.width = percent + '%'

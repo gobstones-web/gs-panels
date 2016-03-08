@@ -14,10 +14,8 @@ Polymer
     
   attached: ->
     @__propagate_height_change()
-    console.log @identifier + ' [simple] attached'
     
   detached:->
-    console.log @identifier + ' [simple] detached'
     
   __propagate_height_change: ->
     if @concretElement 

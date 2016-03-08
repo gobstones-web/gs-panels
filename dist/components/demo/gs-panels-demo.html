@@ -159,6 +159,33 @@
         this.nextClass = this.classOptions[this.nextClassIndex];
         return this.panels = panels = this.$.gsPanels;
       },
+      generate_horizontal: function(hlevel) {
+        var vlevel, _i, _len, _ref, _results;
+        this.panels.add_horizontal(hlevel);
+        _ref = ['LEFT', 'CENTER', 'RIGHT'];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          vlevel = _ref[_i];
+          this._add_panel({
+            component_name: 'gs-panels-demo-item',
+            self_id: hlevel + '_' + vlevel,
+            parent_id: hlevel,
+            klass: this.nextClass
+          });
+          _results.push(this._change_class_index());
+        }
+        return _results;
+      },
+      attached: function() {
+        var hlevel, _i, _len, _ref, _results;
+        _ref = ['BOTTOM', 'MIDDLE', 'TOP'];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          hlevel = _ref[_i];
+          _results.push(this.generate_horizontal(hlevel));
+        }
+        return _results;
+      },
       _next_class_index_change: function() {
         return this.classOptions && (this.nextClass = this.classOptions[this.nextClassIndex]);
       },
@@ -172,21 +199,27 @@
           return this.nextClassIndex = nextClassIndex;
         }
       },
-      _add_panel_simple: function() {
+      _add_panel: function(cfg) {
         var item;
-        item = document.createElement('gs-panels-demo-item');
-        item.elementClasses = this.nextClass;
-        item.elementName = this.nextId;
-        this.panels.add(item, this.nextId, this.parentId);
+        item = document.createElement(cfg.component_name);
+        item.elementClasses = cfg.klass;
+        item.elementName = cfg.self_id;
+        return this.panels.add(item, cfg.self_id, cfg.parent_id);
+      },
+      _add_form_panel: function(component_name) {
+        this._add_panel({
+          component_name: component_name,
+          self_id: this.nextId,
+          parent_id: this.parentId,
+          klass: this.nextClass
+        });
         return this._change_class_index();
       },
+      _add_panel_simple: function() {
+        return this._add_form_panel('gs-panels-demo-item');
+      },
       _add_panel_complex: function() {
-        var item;
-        item = document.createElement('gs-panels-demo-item-flex');
-        item.elementClasses = this.nextClass;
-        item.elementName = this.nextId;
-        this.panels.add(item, this.nextId, this.parentId);
-        return this._change_class_index();
+        return this._add_form_panel('gs-panels-demo-item-flex');
       },
       _add_panel_vertical: function() {
         return this.panels.add_vertical(this.nextId, this.parentId);

@@ -36,6 +36,20 @@ Polymer
   ready:->
     @nextClass = @classOptions[@nextClassIndex]
     @panels = panels = @$.gsPanels
+    
+  generate_horizontal:(hlevel)->  
+    @panels.add_horizontal hlevel
+    for vlevel in ['LEFT','CENTER','RIGHT']
+      @_add_panel
+        component_name: 'gs-panels-demo-item'
+        self_id: hlevel + '_' + vlevel
+        parent_id: hlevel
+        klass: @nextClass
+      @_change_class_index()
+        
+  attached:->
+    for hlevel in ['BOTTOM','MIDDLE','TOP']
+      @generate_horizontal hlevel
   
   _next_class_index_change:->
     @classOptions and @nextClass = @classOptions[@nextClassIndex]
@@ -46,20 +60,24 @@ Polymer
       if nextClassIndex >= @classOptions.length
         nextClassIndex = 0
       @nextClassIndex = nextClassIndex
+  
+  _add_panel: (cfg)->
+    item = document.createElement cfg.component_name
+    item.elementClasses = cfg.klass
+    item.elementName = cfg.self_id
+    @panels.add item, cfg.self_id, cfg.parent_id
     
-  _add_panel_simple: ->
-    item = document.createElement 'gs-panels-demo-item'
-    item.elementClasses = @nextClass
-    item.elementName = @nextId
-    @panels.add item, @nextId, @parentId
+  _add_form_panel: (component_name)->
+    @_add_panel 
+      component_name: component_name
+      self_id: @nextId
+      parent_id: @parentId
+      klass: @nextClass
     @_change_class_index()
     
-  _add_panel_complex: ->
-    item = document.createElement 'gs-panels-demo-item-flex'
-    item.elementClasses = @nextClass
-    item.elementName = @nextId
-    @panels.add item, @nextId, @parentId
-    @_change_class_index()
+  _add_panel_simple: -> @_add_form_panel 'gs-panels-demo-item'
+    
+  _add_panel_complex: -> @_add_form_panel 'gs-panels-demo-item-flex'
       
   _add_panel_vertical: ->
     @panels.add_vertical @nextId, @parentId

@@ -5,19 +5,9 @@ Polymer
   MIN_HEIGHT: 100
   
   properties: 
-    #panelChildren:
-    #  type: Array
-    #  value: []
-    #  observer: '_panel_children_change'
-    panelWidth:
-      type: Number 
-      value: 100
-      observer: '_panel_width_change'
     orientation:
       type: String
   behaviors: [GS.Rezisable]
-  
-  observers: ['_children_change(panelChildren.*)']
   
   listeners: do ->
     listeners = {}
@@ -37,22 +27,25 @@ Polymer
     @__child_resize_finish(evnt.detail.context, evnt.detail.position)
       
   ready:->
+    @deferred = []
     @panelChildren = []
-    
-  _panel_children_change:->
-    console.log @panelChildren
-    
+  
+  process_deferred:->
+    for deferred in @deferred
+      @add_panel_children deferred
+    @deferred.length = 0
+  
   attached:->
+    @be_attached = true
     @orientation = @orientation or GS.HORIZONTAL
-    console.log @identifier + ' [composite] attached'
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
-    @_children_change()
-  
-  detached:->
-    console.log @identifier + ' [composite] detached'
+    @process_deferred()
+    #@_panel_children_change()
     
-  _children_change:->
+  detached:->
+    
+  _panel_children_change:->
     if @panelChildren.length > 0
       @style.height = @panelHeight + 'px'
     else
@@ -63,12 +56,13 @@ Polymer
       child.notLast = index isnt last_index
       
   add_panel_children: (panel)->
-    console.log 'self: ' + @identifier
-    console.log 'panel: ' + panel.identifier
-    panel.parentOrientation = @orientation
-    @_after_push panel, 0
-    @push 'panelChildren', panel
-    @_panel_children_change()
+    if @be_attached
+      panel.parentOrientation = @orientation
+      @_after_push panel, 0
+      @push 'panelChildren', panel
+      @_panel_children_change()
+    else
+      @deferred.push panel
   
   add_composite: (ori, item_id)->
     next = document.createElement 'gs-panel-composite'
@@ -84,13 +78,11 @@ Polymer
     next.identifier = item_id
     @add_panel_children next
     next
-  
-  _panel_width_change: ->
-    @__set_width_percent @panelWidth
-    
+
   flow_strategies:
     horizontal:
       _after_push: (element)->
+        console.log '_after_push horizontal'
         amount = @panelChildren.length + 1
         count = 0
         average = 100 / amount
@@ -124,7 +116,7 @@ Polymer
         @__fix_width_against @panelChildren[context.item.index + 1]
 
       __child_resize_finish: (context, position)->
-        context.item.style.transition = '0.5s'
+        #context.item.style.transition = '0.5s'
         
       __fix_width_against: (fix_item)->
         count = 0
@@ -133,9 +125,14 @@ Polymer
             continue
           count += child.resize_data.width
         fix_item.panelWidth = 100 - count   
+        
+      __propagate_height_change:->
+        for child in @panelChildren 
+          child.panelHeight = @fixedHeight
 
     vertical:
       _after_push: (element)->
+        console.log '_after_push vertical'
         amount = @panelChildren.length + 1
         count = 0
         total = @fixedHeight

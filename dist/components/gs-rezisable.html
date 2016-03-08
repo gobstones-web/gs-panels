@@ -20,9 +20,13 @@
         parentOrientation: {
           type: String
         },
+        panelWidth: {
+          type: Number,
+          value: 100,
+          observer: '__panel_width_change'
+        },
         fixedHeight: {
           type: Number,
-          value: 0,
           observer: '__fixed_height_change'
         },
         panelHeight: {
@@ -84,13 +88,18 @@
           return this.fixedHeight = this.panelHeight;
         }
       },
+      __fixed_height_change: function() {
+        return this.__propagate_height_change();
+      },
+      __propagate_height_change: function() {},
       __panel_height_change: function() {
         this.__set_height_px(this.panelHeight);
         return this.__update_fixed_height();
       },
-      __propagate_height_change: function() {},
-      __fixed_height_change: function() {
-        return this.__propagate_height_change();
+      __propagate_width_change: function() {},
+      __panel_width_change: function() {
+        this.__set_width_percent(this.panelWidth);
+        return this.__propagate_width_change();
       },
       __set_width_percent: function(percent) {
         this.style.width = percent + '%';

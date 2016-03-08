@@ -46,12 +46,9 @@
         return this.container = this.$.container;
       },
       attached: function() {
-        this.__propagate_height_change();
-        return console.log(this.identifier + ' [simple] attached');
+        return this.__propagate_height_change();
       },
-      detached: function() {
-        return console.log(this.identifier + ' [simple] detached');
-      },
+      detached: function() {},
       __propagate_height_change: function() {
         if (this.concretElement) {
           return this.concretElement.style.height = this.fixedHeight + 'px';

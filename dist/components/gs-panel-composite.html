@@ -39,17 +39,11 @@
       MIN_WIDTH: 150,
       MIN_HEIGHT: 100,
       properties: {
-        panelWidth: {
-          type: Number,
-          value: 100,
-          observer: '_panel_width_change'
-        },
         orientation: {
           type: String
         }
       },
       behaviors: [GS.Rezisable],
-      observers: ['_children_change(panelChildren.*)'],
       listeners: (function() {
         var listeners;
         listeners = {};
@@ -71,22 +65,27 @@
         return this.__child_resize_finish(evnt.detail.context, evnt.detail.position);
       },
       ready: function() {
+        this.deferred = [];
         return this.panelChildren = [];
       },
-      _panel_children_change: function() {
-        return console.log(this.panelChildren);
+      process_deferred: function() {
+        var deferred, _i, _len, _ref;
+        _ref = this.deferred;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          deferred = _ref[_i];
+          this.add_panel_children(deferred);
+        }
+        return this.deferred.length = 0;
       },
       attached: function() {
+        this.be_attached = true;
         this.orientation = this.orientation || GS.HORIZONTAL;
-        console.log(this.identifier + ' [composite] attached');
         this.classList.add(this.orientation);
         this.extend(this, this.flow_strategies[this.orientation]);
-        return this._children_change();
+        return this.process_deferred();
       },
-      detached: function() {
-        return console.log(this.identifier + ' [composite] detached');
-      },
-      _children_change: function() {
+      detached: function() {},
+      _panel_children_change: function() {
         var child, index, last_index, _i, _len, _ref, _results;
         if (this.panelChildren.length > 0) {
           this.style.height = this.panelHeight + 'px';
@@ -104,12 +103,14 @@
         return _results;
       },
       add_panel_children: function(panel) {
-        console.log('self: ' + this.identifier);
-        console.log('panel: ' + panel.identifier);
-        panel.parentOrientation = this.orientation;
-        this._after_push(panel, 0);
-        this.push('panelChildren', panel);
-        return this._panel_children_change();
+        if (this.be_attached) {
+          panel.parentOrientation = this.orientation;
+          this._after_push(panel, 0);
+          this.push('panelChildren', panel);
+          return this._panel_children_change();
+        } else {
+          return this.deferred.push(panel);
+        }
       },
       add_composite: function(ori, item_id) {
         var next;
@@ -128,13 +129,11 @@
         this.add_panel_children(next);
         return next;
       },
-      _panel_width_change: function() {
-        return this.__set_width_percent(this.panelWidth);
-      },
       flow_strategies: {
         horizontal: {
           _after_push: function(element) {
             var amount, average, child, count, last_width, _i, _len, _ref;
+            console.log('_after_push horizontal');
             amount = this.panelChildren.length + 1;
             count = 0;
             average = 100 / amount;
@@ -172,9 +171,7 @@
             context.item.panelWidth = next_percent;
             return this.__fix_width_against(this.panelChildren[context.item.index + 1]);
           },
-          __child_resize_finish: function(context, position) {
-            return context.item.style.transition = '0.5s';
-          },
+          __child_resize_finish: function(context, position) {},
           __fix_width_against: function(fix_item) {
             var child, count, _i, _len, _ref;
             count = 0;
@@ -187,11 +184,22 @@
               count += child.resize_data.width;
             }
             return fix_item.panelWidth = 100 - count;
+          },
+          __propagate_height_change: function() {
+            var child, _i, _len, _ref, _results;
+            _ref = this.panelChildren;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              _results.push(child.panelHeight = this.fixedHeight);
+            }
+            return _results;
           }
         },
         vertical: {
           _after_push: function(element) {
             var amount, average, child, count, last_height, total, _i, _len, _ref;
+            console.log('_after_push vertical');
             amount = this.panelChildren.length + 1;
             count = 0;
             total = this.fixedHeight;
