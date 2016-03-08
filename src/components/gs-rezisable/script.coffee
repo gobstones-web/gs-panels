@@ -5,6 +5,8 @@ if typeof window.GS is 'undefined'
 GS.Rezisable =
 
   properties: 
+    identifier:
+      type: String
     parentOrientation:
       type: String
     fixedHeight:
@@ -56,7 +58,7 @@ GS.Rezisable =
     @__update_fixed_height()
   
   __update_fixed_height: ->
-    if @parentOrientation is GS.VERTICAL and @notLast
+    if @parentOrientation is GS.Rezisable.VERTICAL and @notLast
       @fixedHeight = @panelHeight - 7
     else
       @fixedHeight = @panelHeight

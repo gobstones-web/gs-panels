@@ -20,7 +20,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.2.0",
+    "polymer": "Polymer/polymer#^1.3.0",
     "gs-common": "~0.0.3-r"
   },
   "devDependencies": {

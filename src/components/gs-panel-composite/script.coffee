@@ -5,9 +5,10 @@ Polymer
   MIN_HEIGHT: 100
   
   properties: 
-    children:
-      type: Array
-      value: []
+    #panelChildren:
+    #  type: Array
+    #  value: []
+    #  observer: '_panel_children_change'
     panelWidth:
       type: Number 
       value: 100
@@ -16,10 +17,7 @@ Polymer
       type: String
   behaviors: [GS.Rezisable]
   
-  __fresh: true
-  INITIAL_HEIGHT: 400
-  
-  observers: ['_children_change(children.*)']
+  observers: ['_children_change(panelChildren.*)']
   
   listeners: do ->
     listeners = {}
@@ -39,29 +37,53 @@ Polymer
     @__child_resize_finish(evnt.detail.context, evnt.detail.position)
       
   ready:->
+    @panelChildren = []
+    
+  _panel_children_change:->
+    console.log @panelChildren
     
   attached:->
     @orientation = @orientation or GS.HORIZONTAL
+    console.log @identifier + ' [composite] attached'
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
+    @_children_change()
+  
+  detached:->
+    console.log @identifier + ' [composite] detached'
     
   _children_change:->
-    if @children.length > 0
+    if @panelChildren.length > 0
       @style.height = @panelHeight + 'px'
     else
       @style.height = 'none'
-    last_index = @children.length - 1
-    for child, index in @children
+    last_index = @panelChildren.length - 1
+    for child, index in @panelChildren
       child.index = index
       child.notLast = index isnt last_index
-
-  add: (element)->
+      
+  add_panel_children: (panel)->
+    console.log 'self: ' + @identifier
+    console.log 'panel: ' + panel.identifier
+    panel.parentOrientation = @orientation
+    @_after_push panel, 0
+    @push 'panelChildren', panel
+    @_panel_children_change()
+  
+  add_composite: (ori, item_id)->
+    next = document.createElement 'gs-panel-composite'
+    next.orientation = ori
+    next.identifier = item_id
+    @add_panel_children next
+    next
+  
+  add_simple: (element, item_id)->
     next = document.createElement 'gs-panel-simple'
-    next.resize_data = {}
+    element.identifier = item_id + '-concret-element'
     next.concretElement = element
-    next.parentOrientation = @orientation
-    @_after_push next, 0
-    @push 'children', next
+    next.identifier = item_id
+    @add_panel_children next
+    next
   
   _panel_width_change: ->
     @__set_width_percent @panelWidth
@@ -69,10 +91,10 @@ Polymer
   flow_strategies:
     horizontal:
       _after_push: (element)->
-        amount = @children.length + 1
+        amount = @panelChildren.length + 1
         count = 0
         average = 100 / amount
-        for child in @children
+        for child in @panelChildren
           child.panelWidth = average
           count += child.resize_data.width
         last_width = 100 - count
@@ -84,7 +106,7 @@ Polymer
         context.initial_mouse_x = position.clientX
         context.initial_width = context.item.clientWidth
         context.initial_width_percent = @parse_percent context.item.style.width
-        next_item = @children[context.item.index + 1]
+        next_item = @panelChildren[context.item.index + 1]
         context.max_width = context.item.clientWidth + next_item.clientWidth - @MIN_WIDTH
         context.item.style.transition = 'none'
 
@@ -99,14 +121,14 @@ Polymer
           next_px = @MIN_WIDTH
         next_percent = context.initial_width_percent * next_px / context.initial_width
         context.item.panelWidth = next_percent
-        @__fix_width_against @children[context.item.index + 1]
+        @__fix_width_against @panelChildren[context.item.index + 1]
 
       __child_resize_finish: (context, position)->
         context.item.style.transition = '0.5s'
         
       __fix_width_against: (fix_item)->
         count = 0
-        for child in @children
+        for child in @panelChildren
           if child is fix_item
             continue
           count += child.resize_data.width
@@ -114,11 +136,11 @@ Polymer
 
     vertical:
       _after_push: (element)->
-        amount = @children.length + 1
+        amount = @panelChildren.length + 1
         count = 0
         total = @fixedHeight
         average = total / amount
-        for child in @children
+        for child in @panelChildren
           child.panelHeight = average
           count += child.resize_data.height
         last_height = total - count
@@ -127,43 +149,41 @@ Polymer
       __child_resize_begin: (context, position)->
         #context.item cannot be the last child
         context.initial_mouse_y = position.clientY
-        context.initial_height = context.item.clientHeight
-        context.initial_height_px = @parse_px context.item.style.height
-        next_item = @children[context.item.index + 1]
-        context.max_height = context.item.clientHeight + next_item.clientHeight - @MIN_HEIGTH
-        context.item.style.transition = 'none'
+        context.initial_height  = context.item.panelHeight
+        next_item = @panelChildren[context.item.index + 1]
+        context.max_height = context.item.panelHeight + next_item.panelHeight - @MIN_HEIGHT
+        #context.item.style.transition = 'none'
         
       __child_resize: (context, position)->
         #context.item cannot be the last child
         height = @clientHeight
-        x_delta = position.clientY - context.initial_mouse_y
-        next_px = context.initial_height + x_delta
+        y_delta = position.clientY - context.initial_mouse_y
+        next_px = context.initial_height + y_delta
         if next_px > context.max_height
           next_px = context.max_height
         if next_px < @MIN_HEIGHT
           next_px = @MIN_HEIGHT
-        next_percent = context.initial_height_px * next_px / context.initial_height
-        context.item.panelHeight = next_percent
-        @__fix_height_against @children[context.item.index + 1]
+        context.item.panelHeight = next_px
+        @__fix_height_against @panelChildren[context.item.index + 1]
         
       __fix_height_against: (fix_item)->
         count = 0
-        for child in @children
-          if child is fix_item
-            continue
+        for child in @panelChildren
+          if child is fix_item then continue
           count += child.resize_data.height
         fix_item.panelHeight = @fixedHeight - count 
          
       __child_resize_finish: (context, position)->
+        #context.item.style.transition = '0.5s'
       
       __propagate_height_change:->
-        amount = @children.length
+        amount = @panelChildren.length
         if amount > 0
-          last_item = @children[amount - 1]
+          last_item = @panelChildren[amount - 1]
           count = 0
           total = @fixedHeight
           average = total / amount
-          for child in @children
+          for child in @panelChildren
             if child is last_item then continue
             child.panelHeight = average
             count += child.resize_data.height

@@ -91,10 +91,16 @@
       </paper-menu-button>
       <paper-checkbox checked="{{changeClassAuto}}">Change Auto</paper-checkbox><br/>
       
-      <span>name: </span>
-      <input is="iron-input" bind-value="{{nextName}}" /><br/>
-      <button id="panelSimple" >agregar panel simple</button>
-      <button id="panelComplex" >agregar panel complejo</button>
+      <span>Add into: </span>
+      <input is="iron-input" bind-value="{{parentId}}" />
+      <span>(empty = #main)</span><br/>
+      
+      <span>Identifier: </span>
+      <input is="iron-input" bind-value="{{nextId}}" /><br/>
+      <button id="panelSimple" >add simple panel</button>
+      <button id="panelComplex" >add complex panel</button>
+      <button id="panelVertical" >add vertical panel</button>
+      <button id="panelHorizontal" >add horizontal panel</button>
     </div>
 
     <template is="dom-if" if="{{showLeftBlock}}">
@@ -133,14 +139,20 @@
           type: Array,
           value: ['red', 'green', 'blue']
         },
-        nextName: {
+        parentId: {
           type: String,
-          value: 'Panel Name'
+          value: ''
+        },
+        nextId: {
+          type: String,
+          value: 'top-horizontal'
         }
       },
       listeners: {
         'panelSimple.tap': '_add_panel_simple',
-        'panelComplex.tap': '_add_panel_complex'
+        'panelComplex.tap': '_add_panel_complex',
+        'panelVertical.tap': '_add_panel_vertical',
+        'panelHorizontal.tap': '_add_panel_horizontal'
       },
       ready: function() {
         var panels;
@@ -164,17 +176,23 @@
         var item;
         item = document.createElement('gs-panels-demo-item');
         item.elementClasses = this.nextClass;
-        item.elementName = this.nextName;
-        this.panels.add(item);
+        item.elementName = this.nextId;
+        this.panels.add(item, this.nextId, this.parentId);
         return this._change_class_index();
       },
       _add_panel_complex: function() {
         var item;
         item = document.createElement('gs-panels-demo-item-flex');
         item.elementClasses = this.nextClass;
-        item.elementName = this.nextName;
-        this.panels.add(item);
+        item.elementName = this.nextId;
+        this.panels.add(item, this.nextId, this.parentId);
         return this._change_class_index();
+      },
+      _add_panel_vertical: function() {
+        return this.panels.add_vertical(this.nextId, this.parentId);
+      },
+      _add_panel_horizontal: function() {
+        return this.panels.add_horizontal(this.nextId, this.parentId);
       },
       _is_numeric: function(value) {
         return !isNaN(value) && value !== '';

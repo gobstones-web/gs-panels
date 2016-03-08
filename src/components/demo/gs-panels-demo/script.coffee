@@ -20,13 +20,18 @@ Polymer
     classOptions:
       type: Array
       value: ['red', 'green', 'blue']
-    nextName:
+    parentId:
       type: String
-      value: 'Panel Name'
+      value: ''
+    nextId:
+      type: String
+      value: 'top-horizontal'
       
   listeners:
     'panelSimple.tap': '_add_panel_simple'
     'panelComplex.tap': '_add_panel_complex'
+    'panelVertical.tap': '_add_panel_vertical'
+    'panelHorizontal.tap': '_add_panel_horizontal'
       
   ready:->
     @nextClass = @classOptions[@nextClassIndex]
@@ -45,16 +50,22 @@ Polymer
   _add_panel_simple: ->
     item = document.createElement 'gs-panels-demo-item'
     item.elementClasses = @nextClass
-    item.elementName = @nextName
-    @panels.add item
+    item.elementName = @nextId
+    @panels.add item, @nextId, @parentId
     @_change_class_index()
     
   _add_panel_complex: ->
     item = document.createElement 'gs-panels-demo-item-flex'
     item.elementClasses = @nextClass
-    item.elementName = @nextName
-    @panels.add item
+    item.elementName = @nextId
+    @panels.add item, @nextId, @parentId
     @_change_class_index()
+      
+  _add_panel_vertical: ->
+    @panels.add_vertical @nextId, @parentId
+    
+  _add_panel_horizontal: ->
+    @panels.add_horizontal @nextId, @parentId
     
   _is_numeric: (value)->
     not isNaN(value) and value isnt ''

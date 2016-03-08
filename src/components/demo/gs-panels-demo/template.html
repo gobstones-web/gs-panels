@@ -20,10 +20,16 @@
   </paper-menu-button>
   <paper-checkbox checked="{{changeClassAuto}}">Change Auto</paper-checkbox><br/>
   
-  <span>name: </span>
-  <input is="iron-input" bind-value="{{nextName}}" /><br/>
-  <button id="panelSimple" >agregar panel simple</button>
-  <button id="panelComplex" >agregar panel complejo</button>
+  <span>Add into: </span>
+  <input is="iron-input" bind-value="{{parentId}}" />
+  <span>(empty = #main)</span><br/>
+  
+  <span>Identifier: </span>
+  <input is="iron-input" bind-value="{{nextId}}" /><br/>
+  <button id="panelSimple" >add simple panel</button>
+  <button id="panelComplex" >add complex panel</button>
+  <button id="panelVertical" >add vertical panel</button>
+  <button id="panelHorizontal" >add horizontal panel</button>
 </div>
 
 <template is="dom-if" if="{{showLeftBlock}}">

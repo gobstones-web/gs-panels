@@ -3,7 +3,7 @@
 <link rel="import" href="gs-rezisable.html">
 <link rel="import" href="gs-events.html">
 <link rel="import" href="../../../gs-common/dist/components/dom-inject.html">
-<dom-module id="gs-panel-composite">
+<dom-module id="gs-panel-composite-second">
   <template>
     <style>
       :host {
@@ -26,7 +26,7 @@
 
     </style>
 
-    <template is="dom-repeat" items="{{panelChildren}}" as="child">
+    <template is="dom-repeat" items="{{panelSecondChildren}}" as="child">
       <template is="dom-inject" element="{{child}}"></template>
     </template>
     <template is="dom-if" if="{{notLast}}">
@@ -35,10 +35,15 @@
   </template>
   <script>
     Polymer({
-      is: 'gs-panel-composite',
+      is: 'gs-panel-composite-second',
       MIN_WIDTH: 150,
       MIN_HEIGHT: 100,
       properties: {
+        panelSecondChildren: {
+          type: Array,
+          value: [],
+          observer: '_panel_children_change'
+        },
         panelWidth: {
           type: Number,
           value: 100,
@@ -49,7 +54,7 @@
         }
       },
       behaviors: [GS.Rezisable],
-      observers: ['_children_change(panelChildren.*)'],
+      observers: ['_children_change(panelSecondChildren.*)'],
       listeners: (function() {
         var listeners;
         listeners = {};
@@ -70,11 +75,9 @@
         evnt.cancelBubble = true;
         return this.__child_resize_finish(evnt.detail.context, evnt.detail.position);
       },
-      ready: function() {
-        return this.panelChildren = [];
-      },
+      ready: function() {},
       _panel_children_change: function() {
-        return console.log(this.panelChildren);
+        return console.log(this.panelSecondChildren);
       },
       attached: function() {
         this.orientation = this.orientation || GS.HORIZONTAL;
@@ -88,13 +91,13 @@
       },
       _children_change: function() {
         var child, index, last_index, _i, _len, _ref, _results;
-        if (this.panelChildren.length > 0) {
+        if (this.panelSecondChildren.length > 0) {
           this.style.height = this.panelHeight + 'px';
         } else {
           this.style.height = 'none';
         }
-        last_index = this.panelChildren.length - 1;
-        _ref = this.panelChildren;
+        last_index = this.panelSecondChildren.length - 1;
+        _ref = this.panelSecondChildren;
         _results = [];
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           child = _ref[index];
@@ -108,8 +111,7 @@
         console.log('panel: ' + panel.identifier);
         panel.parentOrientation = this.orientation;
         this._after_push(panel, 0);
-        this.push('panelChildren', panel);
-        return this._panel_children_change();
+        return this.push('panelSecondChildren', panel);
       },
       add_composite: function(ori, item_id) {
         var next;
@@ -135,10 +137,10 @@
         horizontal: {
           _after_push: function(element) {
             var amount, average, child, count, last_width, _i, _len, _ref;
-            amount = this.panelChildren.length + 1;
+            amount = this.panelSecondChildren.length + 1;
             count = 0;
             average = 100 / amount;
-            _ref = this.panelChildren;
+            _ref = this.panelSecondChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
               child.panelWidth = average;
@@ -153,7 +155,7 @@
             context.initial_mouse_x = position.clientX;
             context.initial_width = context.item.clientWidth;
             context.initial_width_percent = this.parse_percent(context.item.style.width);
-            next_item = this.panelChildren[context.item.index + 1];
+            next_item = this.panelSecondChildren[context.item.index + 1];
             context.max_width = context.item.clientWidth + next_item.clientWidth - this.MIN_WIDTH;
             return context.item.style.transition = 'none';
           },
@@ -170,7 +172,7 @@
             }
             next_percent = context.initial_width_percent * next_px / context.initial_width;
             context.item.panelWidth = next_percent;
-            return this.__fix_width_against(this.panelChildren[context.item.index + 1]);
+            return this.__fix_width_against(this.panelSecondChildren[context.item.index + 1]);
           },
           __child_resize_finish: function(context, position) {
             return context.item.style.transition = '0.5s';
@@ -178,7 +180,7 @@
           __fix_width_against: function(fix_item) {
             var child, count, _i, _len, _ref;
             count = 0;
-            _ref = this.panelChildren;
+            _ref = this.panelSecondChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
               if (child === fix_item) {
@@ -192,11 +194,11 @@
         vertical: {
           _after_push: function(element) {
             var amount, average, child, count, last_height, total, _i, _len, _ref;
-            amount = this.panelChildren.length + 1;
+            amount = this.panelSecondChildren.length + 1;
             count = 0;
             total = this.fixedHeight;
             average = total / amount;
-            _ref = this.panelChildren;
+            _ref = this.panelSecondChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
               child.panelHeight = average;
@@ -209,7 +211,7 @@
             var next_item;
             context.initial_mouse_y = position.clientY;
             context.initial_height = context.item.panelHeight;
-            next_item = this.panelChildren[context.item.index + 1];
+            next_item = this.panelSecondChildren[context.item.index + 1];
             return context.max_height = context.item.panelHeight + next_item.panelHeight - this.MIN_HEIGHT;
           },
           __child_resize: function(context, position) {
@@ -224,12 +226,12 @@
               next_px = this.MIN_HEIGHT;
             }
             context.item.panelHeight = next_px;
-            return this.__fix_height_against(this.panelChildren[context.item.index + 1]);
+            return this.__fix_height_against(this.panelSecondChildren[context.item.index + 1]);
           },
           __fix_height_against: function(fix_item) {
             var child, count, _i, _len, _ref;
             count = 0;
-            _ref = this.panelChildren;
+            _ref = this.panelSecondChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
               if (child === fix_item) {
@@ -242,13 +244,13 @@
           __child_resize_finish: function(context, position) {},
           __propagate_height_change: function() {
             var amount, average, child, count, last_height, last_item, total, _i, _len, _ref;
-            amount = this.panelChildren.length;
+            amount = this.panelSecondChildren.length;
             if (amount > 0) {
-              last_item = this.panelChildren[amount - 1];
+              last_item = this.panelSecondChildren[amount - 1];
               count = 0;
               total = this.fixedHeight;
               average = total / amount;
-              _ref = this.panelChildren;
+              _ref = this.panelSecondChildren;
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 child = _ref[_i];
                 if (child === last_item) {

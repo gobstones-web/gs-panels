@@ -22,6 +22,7 @@ Polymer
   behaviors: [GS.Rezisable]
   
   created:->
+    @register = {}
     @parentOrientation = GS.Rezisable.VERTICAL
       
   ready: ->
@@ -77,8 +78,28 @@ Polymer
   finish_resize:(context, evnt)->
     @fixer.style.minHeight = context.minHeightPX
     @style.transition = '0.5s'
-  
-  add: (element, path)->
-    path = path or '0'
-    @main.add element, path
     
+  DuplicatedIdentifierError: do ->
+    error = (id) ->
+      this.name = 'DuplicatedIdentifierError'
+      this.message = "Duplicated Identifier supplied: [#{id}]"
+    error.prototype = Error.prototype
+    error
+  
+  add: (element, item_id, parent_id)->
+    parent = @register[parent_id] or @main
+    if item_id and @register[item_id] then throw new @DuplicatedIdentifierError(item_id)
+    created = parent.add_simple element, item_id
+    item_id and @register[item_id] = created
+    
+  _add_composite: (ori, item_id, parent_id)->
+    parent = @register[parent_id] or @main
+    if item_id and @register[item_id] then throw new @DuplicatedIdentifierError(item_id)
+    created = parent.add_composite ori, item_id
+    item_id and @register[item_id] = created
+    
+  add_vertical: (item_id, parent_id)->
+    @_add_composite GS.Rezisable.VERTICAL, item_id, parent_id
+    
+  add_horizontal: (item_id, parent_id)->
+    @_add_composite GS.Rezisable.HORIZONTAL, item_id, parent_id

@@ -21,6 +21,7 @@
         id="main" 
         panel-height="{{childHeight}}" 
         parent-orientation="{{orientation}}"
+        identifier="main"
         orientation="{{mainOrientation}}"
       >
       </gs-panel-composite>
@@ -55,6 +56,7 @@
       },
       behaviors: [GS.Rezisable],
       created: function() {
+        this.register = {};
         return this.parentOrientation = GS.Rezisable.VERTICAL;
       },
       ready: function() {
@@ -116,9 +118,38 @@
         this.fixer.style.minHeight = context.minHeightPX;
         return this.style.transition = '0.5s';
       },
-      add: function(element, path) {
-        path = path || '0';
-        return this.main.add(element, path);
+      DuplicatedIdentifierError: (function() {
+        var error;
+        error = function(id) {
+          this.name = 'DuplicatedIdentifierError';
+          return this.message = "Duplicated Identifier supplied: [" + id + "]";
+        };
+        error.prototype = Error.prototype;
+        return error;
+      })(),
+      add: function(element, item_id, parent_id) {
+        var created, parent;
+        parent = this.register[parent_id] || this.main;
+        if (item_id && this.register[item_id]) {
+          throw new this.DuplicatedIdentifierError(item_id);
+        }
+        created = parent.add_simple(element, item_id);
+        return item_id && (this.register[item_id] = created);
+      },
+      _add_composite: function(ori, item_id, parent_id) {
+        var created, parent;
+        parent = this.register[parent_id] || this.main;
+        if (item_id && this.register[item_id]) {
+          throw new this.DuplicatedIdentifierError(item_id);
+        }
+        created = parent.add_composite(ori, item_id);
+        return item_id && (this.register[item_id] = created);
+      },
+      add_vertical: function(item_id, parent_id) {
+        return this._add_composite(GS.Rezisable.VERTICAL, item_id, parent_id);
+      },
+      add_horizontal: function(item_id, parent_id) {
+        return this._add_composite(GS.Rezisable.HORIZONTAL, item_id, parent_id);
       }
     });
 
