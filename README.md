@@ -11,3 +11,5 @@ npm update
 bower update
 grunt server
 ```
+
+listen on `GS_PANELS_CHANGE` to detect changes in panels tree
