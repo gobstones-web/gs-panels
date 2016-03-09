@@ -5,9 +5,18 @@
       :host {
         position: absolute;
         display: block;
+        background-color: #A9A9AA;
+      }
+      :host .points {
+        color: #333333;
+      }
+      :host:hover {
+        background-color: #F1F1F1;
+      }
+      :host:hover .points {
+        color: #505050;
       }
       :host.vertical {
-        background-color: #0f0;
         clear: both;
         height: 7px;
         width: 100%;
@@ -27,7 +36,6 @@
         width: 7px;
         height: 100%;
         display: block;
-        background-color: #0F0;
         cursor: e-resize;
       }
       :host.horizontal .points {

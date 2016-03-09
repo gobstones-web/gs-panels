@@ -2,6 +2,7 @@
   "name": "gs-panel-simple",
   "imports": [
     "gs-rezisable.html",
+    "gs-events.html",
     "../../../gs-common/dist/components/dom-inject.html"
   ]
 }

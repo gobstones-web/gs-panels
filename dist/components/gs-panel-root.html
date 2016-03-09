@@ -13,6 +13,14 @@
         width: 100%;
         min-height: 80px;
       }
+      :host #onReziserFixer {
+        width: 100%;
+        clear: both;
+      }
+      :host .pull-bottom {
+        width: 100%;
+        clear: both;
+      }
 
     </style>
 
@@ -27,6 +35,8 @@
       </gs-panel-composite>
     </div>
     <gs-panel-resize id="panelReziser" class="vertical main"></gs-panel-resize>
+    <div id="onReziserFixer"></div>
+    <div class="pull-bottom"></div>
 
   </template>
   <script>
@@ -54,19 +64,28 @@
           observer: 'child_height_change'
         }
       },
+      listeners: (function() {
+        var listeners;
+        listeners = {};
+        listeners[GS.EVENTS.UNREGISTER] = '_unregister';
+        return listeners;
+      })(),
       behaviors: [GS.Rezisable],
       created: function() {
-        this.register = {};
+        this.register = {
+          main: 1
+        };
         return this.parentOrientation = GS.Rezisable.VERTICAL;
       },
       ready: function() {
         this.main = this.$.main;
         this.reziser = this.$.panelReziser;
-        return this.fixer = this.$.heightFixer;
+        this.fixer = this.$.heightFixer;
+        return this.onReziserFixer = this.$.onReziserFixer;
       },
       attached: function() {
         var MAX_HEIGHT, maxHeight, resizer_h;
-        MAX_HEIGHT = 200;
+        MAX_HEIGHT = 600;
         resizer_h = this.reziser.clientHeight;
         this.minHeightSupported = this.parse_px(this.molt(this.fixer).minHeight);
         if (this.rootHeight) {
@@ -82,6 +101,9 @@
           }
         }
         return this.style.maxHeight = maxHeight;
+      },
+      get_children_tree: function() {
+        return this.main.get_children_tree();
       },
       child_height_change: function() {
         this.fixer.style.maxHeight = this.childHeight + 'px';
@@ -102,21 +124,28 @@
         context.reziserHeight = this.reziser.clientHeight;
         context.initial_frame_heigth = this.clientHeight;
         context.initial_mouse_y = evnt.detail.clientY;
+        context.resizer_fixer_height = screen.height - evnt.detail.clientY;
         return this.style.transition = 'none';
       },
       resize: function(context, evnt) {
-        var nextHeight, y_delta;
+        var nextHeight, next_resizer_height, y_delta;
         y_delta = evnt.clientY - context.initial_mouse_y;
         nextHeight = context.initial_frame_heigth + y_delta;
         if (nextHeight > this.minHeightSupported) {
           this.childHeight = nextHeight - context.reziserHeight;
           this.fixer.style.minHeight = this.childHeight + 'px';
-          return this.style.maxHeight = nextHeight + 'px';
+          this.style.maxHeight = nextHeight + 'px';
+          next_resizer_height = context.resizer_fixer_height;
+          if (y_delta < 0) {
+            next_resizer_height -= y_delta;
+          }
+          return this.onReziserFixer.style.height = next_resizer_height + 'px';
         }
       },
       finish_resize: function(context, evnt) {
         this.fixer.style.minHeight = context.minHeightPX;
-        return this.style.transition = '0.5s';
+        this.style.transition = '0.5s';
+        return this.onReziserFixer.style.height = '0px';
       },
       DuplicatedIdentifierError: (function() {
         var error;
@@ -127,6 +156,14 @@
         error.prototype = Error.prototype;
         return error;
       })(),
+      _unregister: function(polymer_event) {
+        var identifier;
+        identifier = polymer_event.detail.item.identifier;
+        if (identifier) {
+          delete this.register[identifier];
+        }
+        return this.fire(GS.EVENTS.PANELS_CHANGE);
+      },
       add: function(element, item_id, parent_id) {
         var created, parent;
         parent = this.register[parent_id] || this.main;

@@ -1,11 +1,61 @@
+$controls-size: 15px;
+$icon-size: 20px;
+
 :host{
   display: block;
-  overflow: hidden;
-  overflow-x: hidden;
-  overflow-y: hidden;
   float: left;
   position: relative;
   box-sizing: border-box;
+  .hide-overflow{
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  .controls{
+    height: 0px;
+    width: auto;
+    background-color: orange;
+    position: absolute;
+    right: 0;
+    top: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    .control-btn{
+      float: right;
+      width: $controls-size;
+      height: $controls-size;
+      text-align: center;
+      background-color: #F1F1F1;
+      &:hover{
+        background-color: #D2D2D2;
+        .control{
+          color: #505050;
+        }
+      }
+      .control{
+        color: #A9A9AA;
+        margin: -3px;
+        iron-icon{
+          width: $icon-size;
+          height: $icon-size;
+        }
+        &.close{
+          margin: -3px;
+          iron-icon{
+            width: $icon-size - 4;
+            height: $icon-size - 4;
+          }
+        }
+      }
+    }
+  }
+  &:hover{
+    .controls{
+      top: - $controls-size;
+      height: $controls-size;
+    }
+  }
   
   &.child-of-vertical{
     width: 100%;
@@ -16,6 +66,9 @@
   &.child-of-horizontal{
     &.not-last{
       padding-right: 7px;
+      .controls{
+        right: 7px;
+      }
     }
   }
 }

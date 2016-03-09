@@ -22,7 +22,12 @@ Polymer
       @concretElement.style.height = @fixedHeight + 'px'
     else
       #console.log 'skiping height propagation before attach'
-  
+      
+  get_children_tree: ->
+    id: @identifier
+    
   _panel_width_change: ->
     @__set_width_percent @panelWidth
-
+  
+  remove_me: ->
+    @parentNode.fire GS.EVENTS.CHILD_REMOVE, item: @

@@ -144,7 +144,7 @@
         return this.begin_resize(context, evnt);
       },
       begin_resize: function(context, native_event) {
-        return this.fire(GS.EVENTS.CHILD_RESIZE_BEGIN, {
+        return this.parentNode.fire(GS.EVENTS.CHILD_RESIZE_BEGIN, {
           context: context,
           position: {
             clientX: native_event.detail.clientX,
@@ -153,7 +153,7 @@
         });
       },
       resize: function(context, polymer_event) {
-        return this.fire(GS.EVENTS.CHILD_RESIZE, {
+        return this.parentNode.fire(GS.EVENTS.CHILD_RESIZE, {
           context: context,
           position: {
             clientX: polymer_event.clientX,
@@ -162,7 +162,7 @@
         });
       },
       finish_resize: function(context, polymer_event) {
-        return this.fire(GS.EVENTS.CHILD_RESIZE_FINISH, {
+        return this.parentNode.fire(GS.EVENTS.CHILD_RESIZE_FINISH, {
           context: context,
           position: {
             clientX: polymer_event.clientX,

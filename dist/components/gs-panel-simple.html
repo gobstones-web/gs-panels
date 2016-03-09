@@ -1,16 +1,62 @@
 <link rel="import" href="gs-rezisable.html">
+<link rel="import" href="gs-events.html">
 <link rel="import" href="../../../gs-common/dist/components/dom-inject.html">
 <dom-module id="gs-panel-simple">
   <template>
     <style>
       :host {
         display: block;
-        overflow: hidden;
-        overflow-x: hidden;
-        overflow-y: hidden;
         float: left;
         position: relative;
         box-sizing: border-box;
+      }
+      :host .hide-overflow {
+        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+      :host .controls {
+        height: 0px;
+        width: auto;
+        background-color: orange;
+        position: absolute;
+        right: 0;
+        top: 0;
+        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+      :host .controls .control-btn {
+        float: right;
+        width: 15px;
+        height: 15px;
+        text-align: center;
+        background-color: #F1F1F1;
+      }
+      :host .controls .control-btn:hover {
+        background-color: #D2D2D2;
+      }
+      :host .controls .control-btn:hover .control {
+        color: #505050;
+      }
+      :host .controls .control-btn .control {
+        color: #A9A9AA;
+        margin: -3px;
+      }
+      :host .controls .control-btn .control iron-icon {
+        width: 20px;
+        height: 20px;
+      }
+      :host .controls .control-btn .control.close {
+        margin: -3px;
+      }
+      :host .controls .control-btn .control.close iron-icon {
+        width: 16px;
+        height: 16px;
+      }
+      :host:hover .controls {
+        top: -15px;
+        height: 15px;
       }
       :host.child-of-vertical {
         width: 100%;
@@ -21,10 +67,32 @@
       :host.child-of-horizontal.not-last {
         padding-right: 7px;
       }
+      :host.child-of-horizontal.not-last .controls {
+        right: 7px;
+      }
 
     </style>
 
+    <div class="controls">
+      <div class="control-btn" on-click="remove_me">
+        <div class="control close">
+          <iron-icon icon="close"></iron-icon>
+        </div>
+      </div>
+      <div class="control-btn">
+        <div class="control right">
+          <iron-icon icon="chevron-right"></iron-icon>
+        </div>
+      </div>
+      <div class="control-btn">
+        <div class="control left">
+          <iron-icon icon="chevron-left"></iron-icon>
+        </div>
+      </div>
+    </div>
+    <div class="hide-overflow">
     <template is="dom-inject" element="{{concretElement}}"></template>
+    </div>
     <template is="dom-if" if="{{notLast}}">
       <gs-panel-resize class$="{{parentOrientation}}"></gs-panel-resize>
     </template>
@@ -56,8 +124,18 @@
 
         }
       },
+      get_children_tree: function() {
+        return {
+          id: this.identifier
+        };
+      },
       _panel_width_change: function() {
         return this.__set_width_percent(this.panelWidth);
+      },
+      remove_me: function() {
+        return this.parentNode.fire(GS.EVENTS.CHILD_REMOVE, {
+          item: this
+        });
       }
     });
 

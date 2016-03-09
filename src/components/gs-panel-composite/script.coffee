@@ -2,7 +2,7 @@ Polymer
   is: '#GRUNT_COMPONENT_NAME'
   
   MIN_WIDTH: 150
-  MIN_HEIGHT: 100
+  MIN_HEIGHT: 50
   
   properties: 
     orientation:
@@ -14,6 +14,7 @@ Polymer
     listeners[GS.EVENTS.CHILD_RESIZE_BEGIN]  = '__forward_child_resize_begin'
     listeners[GS.EVENTS.CHILD_RESIZE]        = '__forward_child_resize'
     listeners[GS.EVENTS.CHILD_RESIZE_FINISH] = '__forward_child_resize_finish'
+    listeners[GS.EVENTS.CHILD_REMOVE]        = '__forward_child_remove'
     listeners
     
   __forward_child_resize_begin: (evnt)->
@@ -25,10 +26,17 @@ Polymer
   __forward_child_resize_finish: (evnt)->
     evnt.cancelBubble = true
     @__child_resize_finish(evnt.detail.context, evnt.detail.position)
+  __forward_child_remove: (evnt)->
+    evnt.cancelBubble = true
+    @child_remove(evnt.detail.item)
       
   ready:->
     @deferred = []
     @panelChildren = []
+  
+  get_children_tree: ->
+    id: @identifier
+    items: (item.get_children_tree() for item in @panelChildren.concat(@deferred))
   
   process_deferred:->
     for deferred in @deferred
@@ -41,19 +49,14 @@ Polymer
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
     @process_deferred()
-    #@_panel_children_change()
-    
-  detached:->
+    @__propagate_height_change()
     
   _panel_children_change:->
-    if @panelChildren.length > 0
-      @style.height = @panelHeight + 'px'
-    else
-      @style.height = 'none'
     last_index = @panelChildren.length - 1
     for child, index in @panelChildren
       child.index = index
       child.notLast = index isnt last_index
+    @__propagate_height_change()
       
   add_panel_children: (panel)->
     if @be_attached
@@ -63,7 +66,13 @@ Polymer
       @_panel_children_change()
     else
       @deferred.push panel
-  
+      
+  child_remove: (item)->
+    @_after_remove item
+    @splice 'panelChildren', item.index, 1
+    @_panel_children_change()
+    @fire GS.EVENTS.UNREGISTER, item:item
+    
   add_composite: (ori, item_id)->
     next = document.createElement 'gs-panel-composite'
     next.orientation = ori
@@ -82,7 +91,6 @@ Polymer
   flow_strategies:
     horizontal:
       _after_push: (element)->
-        console.log '_after_push horizontal'
         amount = @panelChildren.length + 1
         count = 0
         average = 100 / amount
@@ -92,6 +100,11 @@ Polymer
         last_width = 100 - count
         element.panelWidth = last_width
         element.panelHeight = @panelHeight
+      
+      _after_remove: (child)->
+        if @panelChildren.length > 1
+          fix_width_index = if child.index is 0 then 1 else (child.index - 1)
+          @panelChildren[fix_width_index].panelWidth += child.panelWidth
         
       __child_resize_begin: (context, position)->
         #context.item cannot be the last child
@@ -132,7 +145,6 @@ Polymer
 
     vertical:
       _after_push: (element)->
-        console.log '_after_push vertical'
         amount = @panelChildren.length + 1
         count = 0
         total = @fixedHeight
@@ -142,7 +154,12 @@ Polymer
           count += child.resize_data.height
         last_height = total - count
         element.panelHeight = last_height
-
+        
+      _after_remove: (child)->
+        if @panelChildren.length > 1
+          fix_height_index = if child.index is 0 then 1 else (child.index - 1)
+          @panelChildren[fix_height_index].panelHeight += child.panelHeight  
+          
       __child_resize_begin: (context, position)->
         #context.item cannot be the last child
         context.initial_mouse_y = position.clientY

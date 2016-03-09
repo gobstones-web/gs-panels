@@ -113,21 +113,21 @@ GS.Rezisable =
     @begin_resize context, evnt
    
   begin_resize:(context, native_event)->
-    @fire GS.EVENTS.CHILD_RESIZE_BEGIN, 
+    @parentNode.fire GS.EVENTS.CHILD_RESIZE_BEGIN, 
       context: context
       position:
         clientX: native_event.detail.clientX
         clientY: native_event.detail.clientY
         
   resize:(context, polymer_event)->
-    @fire GS.EVENTS.CHILD_RESIZE, 
+    @parentNode.fire GS.EVENTS.CHILD_RESIZE, 
       context: context
       position:
         clientX: polymer_event.clientX
         clientY: polymer_event.clientY
     
   finish_resize:(context, polymer_event)->
-    @fire GS.EVENTS.CHILD_RESIZE_FINISH,
+    @parentNode.fire GS.EVENTS.CHILD_RESIZE_FINISH,
       context: context
       position:
         clientX: polymer_event.clientX

@@ -37,7 +37,7 @@
     Polymer({
       is: 'gs-panel-composite',
       MIN_WIDTH: 150,
-      MIN_HEIGHT: 100,
+      MIN_HEIGHT: 50,
       properties: {
         orientation: {
           type: String
@@ -50,6 +50,7 @@
         listeners[GS.EVENTS.CHILD_RESIZE_BEGIN] = '__forward_child_resize_begin';
         listeners[GS.EVENTS.CHILD_RESIZE] = '__forward_child_resize';
         listeners[GS.EVENTS.CHILD_RESIZE_FINISH] = '__forward_child_resize_finish';
+        listeners[GS.EVENTS.CHILD_REMOVE] = '__forward_child_remove';
         return listeners;
       })(),
       __forward_child_resize_begin: function(evnt) {
@@ -64,9 +65,29 @@
         evnt.cancelBubble = true;
         return this.__child_resize_finish(evnt.detail.context, evnt.detail.position);
       },
+      __forward_child_remove: function(evnt) {
+        evnt.cancelBubble = true;
+        return this.child_remove(evnt.detail.item);
+      },
       ready: function() {
         this.deferred = [];
         return this.panelChildren = [];
+      },
+      get_children_tree: function() {
+        var item;
+        return {
+          id: this.identifier,
+          items: (function() {
+            var _i, _len, _ref, _results;
+            _ref = this.panelChildren.concat(this.deferred);
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              item = _ref[_i];
+              _results.push(item.get_children_tree());
+            }
+            return _results;
+          }).call(this)
+        };
       },
       process_deferred: function() {
         var deferred, _i, _len, _ref;
@@ -82,25 +103,19 @@
         this.orientation = this.orientation || GS.HORIZONTAL;
         this.classList.add(this.orientation);
         this.extend(this, this.flow_strategies[this.orientation]);
-        return this.process_deferred();
+        this.process_deferred();
+        return this.__propagate_height_change();
       },
-      detached: function() {},
       _panel_children_change: function() {
-        var child, index, last_index, _i, _len, _ref, _results;
-        if (this.panelChildren.length > 0) {
-          this.style.height = this.panelHeight + 'px';
-        } else {
-          this.style.height = 'none';
-        }
+        var child, index, last_index, _i, _len, _ref;
         last_index = this.panelChildren.length - 1;
         _ref = this.panelChildren;
-        _results = [];
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           child = _ref[index];
           child.index = index;
-          _results.push(child.notLast = index !== last_index);
+          child.notLast = index !== last_index;
         }
-        return _results;
+        return this.__propagate_height_change();
       },
       add_panel_children: function(panel) {
         if (this.be_attached) {
@@ -111,6 +126,14 @@
         } else {
           return this.deferred.push(panel);
         }
+      },
+      child_remove: function(item) {
+        this._after_remove(item);
+        this.splice('panelChildren', item.index, 1);
+        this._panel_children_change();
+        return this.fire(GS.EVENTS.UNREGISTER, {
+          item: item
+        });
       },
       add_composite: function(ori, item_id) {
         var next;
@@ -133,7 +156,6 @@
         horizontal: {
           _after_push: function(element) {
             var amount, average, child, count, last_width, _i, _len, _ref;
-            console.log('_after_push horizontal');
             amount = this.panelChildren.length + 1;
             count = 0;
             average = 100 / amount;
@@ -146,6 +168,13 @@
             last_width = 100 - count;
             element.panelWidth = last_width;
             return element.panelHeight = this.panelHeight;
+          },
+          _after_remove: function(child) {
+            var fix_width_index;
+            if (this.panelChildren.length > 1) {
+              fix_width_index = child.index === 0 ? 1 : child.index - 1;
+              return this.panelChildren[fix_width_index].panelWidth += child.panelWidth;
+            }
           },
           __child_resize_begin: function(context, position) {
             var next_item;
@@ -199,7 +228,6 @@
         vertical: {
           _after_push: function(element) {
             var amount, average, child, count, last_height, total, _i, _len, _ref;
-            console.log('_after_push vertical');
             amount = this.panelChildren.length + 1;
             count = 0;
             total = this.fixedHeight;
@@ -212,6 +240,13 @@
             }
             last_height = total - count;
             return element.panelHeight = last_height;
+          },
+          _after_remove: function(child) {
+            var fix_height_index;
+            if (this.panelChildren.length > 1) {
+              fix_height_index = child.index === 0 ? 1 : child.index - 1;
+              return this.panelChildren[fix_height_index].panelHeight += child.panelHeight;
+            }
           },
           __child_resize_begin: function(context, position) {
             var next_item;
