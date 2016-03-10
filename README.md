@@ -2,7 +2,7 @@
 
 Gobstones Panels Polymer component
 
-Version: 0.0.0
+Version: 0.0.1
 
 ## deploy
 
