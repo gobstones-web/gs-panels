@@ -2,7 +2,8 @@
   "name": "gs-panels",
   "version": "0.0.0",
   "authors": [
-    "Nazareno Castro <nazarenomartincastro@gmail.com>"
+    "Nazareno Castro <nazarenomartincastro@gmail.com>",
+    "Alejandro Castro <alejandrocastrounqui@gmail.com>"
   ],
   "description": "Panels manager for resizeable and scalable layout",
   "main": "dist/index.html",
