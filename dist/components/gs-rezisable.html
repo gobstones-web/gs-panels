@@ -135,12 +135,12 @@
             evnt.cancelBubble = true;
             evnt.preventDefault();
             _this.finish_resize(context, evnt);
-            document.removeEventListener("mousemove", mousemove);
-            return document.removeEventListener("mouseup", mouseup);
+            window.removeEventListener("mousemove", mousemove);
+            return window.removeEventListener("mouseup", mouseup);
           };
         })(this);
-        document.addEventListener("mouseup", mouseup);
-        document.addEventListener("mousemove", mousemove);
+        window.addEventListener("mouseup", mouseup);
+        window.addEventListener("mousemove", mousemove);
         return this.begin_resize(context, evnt);
       },
       begin_resize: function(context, native_event) {

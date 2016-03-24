@@ -119,9 +119,11 @@
       detached: function() {},
       __propagate_height_change: function() {
         if (this.concretElement) {
-          return this.concretElement.style.height = this.fixedHeight + 'px';
-        } else {
-
+          this.concretElement.style.height = this.fixedHeight + 'px';
+          this.concretElement.panelHeight = this.fixedHeight;
+          return this.concretElement.fire(GS.EVENTS.HAS_BEEN_RESIZED, null, {
+            bubbles: false
+          });
         }
       },
       get_children_tree: function() {

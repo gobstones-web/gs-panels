@@ -106,10 +106,10 @@ GS.Rezisable =
       evnt.cancelBubble = true
       evnt.preventDefault()
       @finish_resize context, evnt
-      document.removeEventListener("mousemove", mousemove)
-      document.removeEventListener("mouseup", mouseup)
-    document.addEventListener("mouseup", mouseup)
-    document.addEventListener("mousemove", mousemove)
+      window.removeEventListener("mousemove", mousemove)
+      window.removeEventListener("mouseup", mouseup)
+    window.addEventListener("mouseup", mouseup)
+    window.addEventListener("mousemove", mousemove)
     @begin_resize context, evnt
    
   begin_resize:(context, native_event)->

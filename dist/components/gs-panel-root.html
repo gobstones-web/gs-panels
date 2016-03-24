@@ -34,8 +34,8 @@
       >
       </gs-panel-composite>
     </div>
-    <gs-panel-resize id="panelReziser" class="vertical main"></gs-panel-resize>
-    <div id="onReziserFixer"></div>
+    <gs-panel-resize id="panelResizer" class="vertical main"></gs-panel-resize>
+    <div id="onReziseFixer"></div>
     <div class="pull-bottom"></div>
 
   </template>
@@ -71,6 +71,8 @@
         return listeners;
       })(),
       behaviors: [GS.Rezisable],
+      RESIZE_DELAY: 100,
+      RESIZE_DELTA: 40,
       created: function() {
         this.register = {
           main: 1
@@ -79,26 +81,26 @@
       },
       ready: function() {
         this.main = this.$.main;
-        this.reziser = this.$.panelReziser;
-        this.fixer = this.$.heightFixer;
-        return this.onReziserFixer = this.$.onReziserFixer;
+        this.resizer = this.$.panelResizer;
+        this.heightFixer = this.$.heightFixer;
+        return this.onReziseFixer = this.$.onReziseFixer;
       },
       attached: function() {
-        var MAX_HEIGHT, maxHeight, resizer_h;
+        var MAX_HEIGHT, maxHeight, next_height, resizer_h;
         MAX_HEIGHT = 600;
-        resizer_h = this.reziser.clientHeight;
-        this.minHeightSupported = this.parse_px(this.molt(this.fixer).minHeight);
+        resizer_h = this.resizer.clientHeight;
+        this.minHeightSupported = this.parse_px(this.molt(this.heightFixer).minHeight);
         if (this.rootHeight) {
           this.childHeight = this.rootHeight - resizer_h;
           maxHeight = this.rootHeight + 'px';
         } else {
           if (this.minHeightSupported > MAX_HEIGHT) {
-            maxHeight = (this.minHeightSupported + resizer_h) + 'px';
-            this.childHeight = this.minHeightSupported;
+            next_height = this.minHeightSupported;
           } else {
-            maxHeight = (MAX_HEIGHT + resizer_h) + 'px';
-            this.childHeight = MAX_HEIGHT;
+            next_height = MAX_HEIGHT;
           }
+          maxHeight = (next_height + resizer_h) + 'px';
+          this.childHeight = next_height;
         }
         return this.style.maxHeight = maxHeight;
       },
@@ -106,7 +108,7 @@
         return this.main.get_children_tree();
       },
       child_height_change: function() {
-        this.fixer.style.maxHeight = this.childHeight + 'px';
+        this.heightFixer.style.maxHeight = this.childHeight + 'px';
         return this.main.panelHeight = this.childHeight;
       },
       _debug_change: function() {
@@ -120,32 +122,72 @@
         }
       },
       begin_resize: function(context, evnt) {
-        context.minHeightPX = this.molt(this.fixer).minHeight;
-        context.reziserHeight = this.reziser.clientHeight;
+        context.outside_resize = 0;
+        context.minHeightPX = this.molt(this.heightFixer).minHeight;
+        context.resizerHeight = this.resizer.clientHeight;
         context.initial_frame_heigth = this.clientHeight;
+        context.initial_window_scroll_y = window.scrollY;
         context.initial_mouse_y = evnt.detail.clientY;
-        context.resizer_fixer_height = screen.height - evnt.detail.clientY;
+        context.on_resize_fixer_height = document.documentElement.clientHeight - evnt.detail.clientY;
         return this.style.transition = 'none';
       },
-      resize: function(context, evnt) {
-        var nextHeight, next_resizer_height, y_delta;
-        y_delta = evnt.clientY - context.initial_mouse_y;
-        nextHeight = context.initial_frame_heigth + y_delta;
+      safe_set_height: function(context, y_delta) {
+        var nextHeight, next_resizer_height;
+        nextHeight = context.initial_frame_heigth + context.outside_resize + y_delta;
         if (nextHeight > this.minHeightSupported) {
-          this.childHeight = nextHeight - context.reziserHeight;
-          this.fixer.style.minHeight = this.childHeight + 'px';
+          this.childHeight = nextHeight - context.resizerHeight;
+          this.heightFixer.style.minHeight = this.childHeight + 'px';
           this.style.maxHeight = nextHeight + 'px';
-          next_resizer_height = context.resizer_fixer_height;
-          if (y_delta < 0) {
-            next_resizer_height -= y_delta;
+          next_resizer_height = context.on_resize_fixer_height;
+          next_resizer_height -= y_delta;
+          if (next_resizer_height < 0) {
+            next_resizer_height = 0;
           }
-          return this.onReziserFixer.style.height = next_resizer_height + 'px';
+          return this.onReziseFixer.style.height = next_resizer_height + 'px';
+        }
+      },
+      auto_resize: function(permission, context, y_delta) {
+        var next_scroll_y, next_time;
+        if (!permission.cancel) {
+          context.outside_resize += this.RESIZE_DELTA;
+          next_scroll_y = context.initial_window_scroll_y + context.outside_resize;
+          window.scrollTo(window.scrollX, next_scroll_y);
+          this.safe_set_height(context, y_delta);
+          this.resizing = permission = {};
+          next_time = (function(_this) {
+            return function() {
+              return _this.auto_resize(permission, context, y_delta);
+            };
+          })(this);
+          return window.setTimeout(next_time, this.RESIZE_DELAY);
+        }
+      },
+      begin_auto_resize: function(context, evnt, y_delta) {
+        this.resizing = {};
+        y_delta = evnt.clientY - context.initial_mouse_y;
+        return this.auto_resize(this.resizing, context, y_delta);
+      },
+      finish_auto_resize: function(context, evnt) {
+        this.resizing.cancel = true;
+        return this.resizing = void 0;
+      },
+      resize: function(context, evnt) {
+        var y_delta;
+        y_delta = evnt.clientY - context.initial_mouse_y;
+        if (evnt.clientY >= document.documentElement.clientHeight) {
+          return !this.resizing && this.begin_auto_resize(context, evnt, y_delta);
+        } else {
+          if (this.resizing) {
+            return this.finish_auto_resize(context, evnt);
+          } else {
+            return this.safe_set_height(context, y_delta);
+          }
         }
       },
       finish_resize: function(context, evnt) {
-        this.fixer.style.minHeight = context.minHeightPX;
-        this.style.transition = '0.5s';
-        return this.onReziserFixer.style.height = '0px';
+        this.resizing && this.finish_auto_resize(context);
+        this.heightFixer.style.minHeight = context.minHeightPX;
+        return this.onReziseFixer.style.height = '0px';
       },
       DuplicatedIdentifierError: (function() {
         var error;

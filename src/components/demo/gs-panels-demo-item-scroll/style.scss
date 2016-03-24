@@ -1,0 +1,38 @@
+:host{
+  box-sizing: border-box;
+  display: block;
+  height: 100%;
+  width: 100%;
+  &.red{
+    background-color: red;
+    color: white;
+  }
+  &.blue{
+    background-color: blue;
+    color: white;
+  }
+  &.green{
+    background-color: #0D0;
+  }
+  .name{
+    font-size: 30px;
+  }
+  .scrollable{
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    &:hover{
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    .container{
+      width: 300px;
+    }
+    .fixer{
+      width: 100%;
+      clear: both;
+    }
+  }
+}

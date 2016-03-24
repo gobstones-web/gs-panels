@@ -1,0 +1,4 @@
+{
+  "name": "gs-panels-demo-item-scroll",
+  "imports": ["../../../../gs-common/dist/components/dom-iterate.html"]
+}
