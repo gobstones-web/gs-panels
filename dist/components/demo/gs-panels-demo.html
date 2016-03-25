@@ -74,8 +74,10 @@
         background-color: #06F;
       }
       :host .panels-wrapper {
-        margin: 20px;
+        padding: 0 20px;
         float: left;
+        box-sizing: border-box;
+        width: 100%;
       }
       :host .left-block {
         height: 200px;
@@ -119,9 +121,12 @@
         <span>Identifier: </span>
         <input is="iron-input" bind-value="{{nextId}}" /><br/>
         <button id="panelSimple" >add simple panel</button>
-        <button id="panelComplex" >add complex panel</button>
+        <button id="panelComplex" >add complex panel</button><br/>
         <button id="panelVertical" >add vertical panel</button>
-        <button id="panelHorizontal" >add horizontal panel</button>
+        <button id="panelHorizontal" >add horizontal panel</button><br/>
+        
+        <input is="iron-input" bind-value="{{setPercentValue}}" />
+        <button id="setPercentButton" >Set percent in element</button>
       </div>
       <div class="tree-container">
         <textarea value="{{treeModel::input}}" disabled="true"></textarea>
@@ -164,6 +169,9 @@
           type: Array,
           value: ['red', 'green', 'blue']
         },
+        setPercentValue: {
+          type: Number
+        },
         treeModel: {
           type: String,
           value: ''
@@ -182,6 +190,7 @@
         'panelComplex.tap': '_add_panel_complex',
         'panelVertical.tap': '_add_panel_vertical',
         'panelHorizontal.tap': '_add_panel_horizontal',
+        'setPercentButton.tap': '_set_percent',
         'GS_PANELS_CHANGE': 'update_tree'
       },
       ready: function() {
@@ -210,14 +219,15 @@
         return _results;
       },
       attached: function() {
-        var hlevel, index, _i, _len, _ref, _results;
+        var hlevel, index, _i, _len, _ref;
         _ref = ['TOP', 'MIDDLE', 'BOTTOM'];
-        _results = [];
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           hlevel = _ref[index];
-          _results.push(this.generate_horizontal(hlevel, index));
+          this.generate_horizontal(hlevel, index);
         }
-        return _results;
+        this.panels.make_resize('TOP', 50);
+        this.panels.make_resize('TOP_CENTER', 50);
+        return this.panels.make_resize('TOP_LEFT', 40);
       },
       _next_class_index_change: function() {
         return this.classOptions && (this.nextClass = this.classOptions[this.nextClassIndex]);
@@ -240,7 +250,10 @@
         item = document.createElement(cfg.component_name);
         item.elementClasses = cfg.klass;
         item.elementName = cfg.self_id;
-        this.panels.add(item, cfg.self_id, cfg.parent_id);
+        this.panels.add(item, {
+          id: cfg.self_id,
+          into: cfg.parent_id
+        });
         return this.update_tree();
       },
       _add_form_panel: function(component_name) {
@@ -259,11 +272,15 @@
         return this._add_form_panel('gs-panels-demo-item-flex');
       },
       _add_panel_vertical: function() {
-        this.panels.add_vertical(this.nextId, this.parentId);
+        this.panels.add_vertical(this.nextId, {
+          into: this.parentId
+        });
         return this.update_tree();
       },
       _add_panel_horizontal: function() {
-        this.panels.add_horizontal(this.nextId, this.parentId);
+        this.panels.add_horizontal(this.nextId, {
+          into: this.parentId
+        });
         return this.update_tree();
       },
       _is_numeric: function(value) {
@@ -282,6 +299,9 @@
         } else {
           return this.panels && (this.panels.style.height = 'auto');
         }
+      },
+      _set_percent: function() {
+        return this.panels.set_percent(this.nextId, this.setPercentValue);
       }
     });
 

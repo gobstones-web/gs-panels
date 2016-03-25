@@ -32,6 +32,10 @@ GS.Rezisable =
   VERTICAL: 'vertical'
   NOT_LAST_CLASS: 'not-last'
   
+  next_id: do ->
+    current = 1111
+    -> current++
+  
   created: ->
     @resize_data = {}
   
@@ -88,11 +92,24 @@ GS.Rezisable =
   __set_height_px: (in_px)->
     @style.height = in_px + 'px'
     @resize_data.height = @parse_px @style.height
+  
+  ready:->
+    @on_attach_once_callbacks = []
+  
+  has_been_attached:->
+    @be_attached = true
+    for callback in @on_attach_once_callbacks
+      callback()
+    @on_attach_once_callbacks.length = 0
     
   attached: ->
+    @has_been_attached()
     @parentOrientation = @parentOrientation or @HORIZONTAL
     @classList.add 'child-of-' + @parentOrientation
-    
+  
+  on_attach_once:(callback)->
+    @on_attach_once_callbacks.push callback
+      
   __on_begin_resize: (evnt)->
     evnt.cancelBubble = true
     evnt.preventDefault()
@@ -132,3 +149,13 @@ GS.Rezisable =
       position:
         clientX: polymer_event.clientX
         clientY: polymer_event.clientY
+        
+  make_resize: (percent)->    
+    process = => 
+      @parentNode.fire GS.EVENTS.CHILD_MAKE_RESIZE,
+        item: @
+        percent: percent
+    if @be_attached  
+      process()
+    else
+      @on_attach_once process

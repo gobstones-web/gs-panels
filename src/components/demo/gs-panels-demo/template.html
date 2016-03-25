@@ -27,9 +27,12 @@
     <span>Identifier: </span>
     <input is="iron-input" bind-value="{{nextId}}" /><br/>
     <button id="panelSimple" >add simple panel</button>
-    <button id="panelComplex" >add complex panel</button>
+    <button id="panelComplex" >add complex panel</button><br/>
     <button id="panelVertical" >add vertical panel</button>
-    <button id="panelHorizontal" >add horizontal panel</button>
+    <button id="panelHorizontal" >add horizontal panel</button><br/>
+    
+    <input is="iron-input" bind-value="{{setPercentValue}}" />
+    <button id="setPercentButton" >Set percent in element</button>
   </div>
   <div class="tree-container">
     <textarea value="{{treeModel::input}}" disabled="true"></textarea>

@@ -121,8 +121,9 @@ Polymer
       context.outside_resize += @RESIZE_DELTA
       next_scroll_y = context.initial_window_scroll_y + context.outside_resize
       window.scrollTo(window.scrollX, next_scroll_y)
+      console.log window.scrollY
       @safe_set_height(context, y_delta)
-      @resizing = permission = {}
+      @resizing = permission = {cancel: true}
       next_time = => @auto_resize(permission, context, y_delta)
       window.setTimeout next_time, @RESIZE_DELAY
     
@@ -157,6 +158,20 @@ Polymer
       this.message = "Duplicated Identifier supplied: [#{id}]"
     error.prototype = Error.prototype
     error
+    
+  UnregisteredIdentifier: do ->
+    error = (id) ->
+      this.name = 'ElementNotRegisteres'
+      this.message = "Unregistered identifier supplied: [#{id}]"
+    error.prototype = Error.prototype
+    error
+    
+  IdentifierRequired: do ->
+    error = () ->
+      this.name = 'IdentifierRequired'
+      this.message = "An identifier must be provided"
+    error.prototype = Error.prototype
+    error
   
   _unregister: (polymer_event)->
     identifier = polymer_event.detail.item.identifier
@@ -164,20 +179,31 @@ Polymer
       delete @register[identifier]
     @fire GS.EVENTS.PANELS_CHANGE
   
-  add: (element, item_id, parent_id)->
-    parent = @register[parent_id] or @main
-    if item_id and @register[item_id] then throw new @DuplicatedIdentifierError(item_id)
-    created = parent.add_simple element, item_id
-    item_id and @register[item_id] = created
+  add: (element, cfg)-> 
+    cfg ?= {}
+    parent = (cfg.into and @register[cfg.into]) or @main
+    if cfg.id and @register[cfg.id] then throw new @DuplicatedIdentifierError(cfg.id)
+    created = parent.add_simple element, cfg.id, cfg.position
+    cfg.id and @register[cfg.id] = created
     
-  _add_composite: (ori, item_id, parent_id)->
-    parent = @register[parent_id] or @main
-    if item_id and @register[item_id] then throw new @DuplicatedIdentifierError(item_id)
-    created = parent.add_composite ori, item_id
-    item_id and @register[item_id] = created
+  _add_composite: (ori, id, cfg)-> 
+    cfg ?= {}
+    parent = (cfg.into and @register[cfg.into]) or @main
+    if id 
+      if @register[id] then throw new @DuplicatedIdentifierError(id)
+    else
+      throw new @IdentifierRequired()
+    created = parent.add_composite ori, id, cfg.position
+    id and @register[id] = created
     
-  add_vertical: (item_id, parent_id)->
-    @_add_composite GS.Rezisable.VERTICAL, item_id, parent_id
+  add_vertical: (id, cfg)->
+    @_add_composite GS.Rezisable.VERTICAL, id, cfg
     
-  add_horizontal: (item_id, parent_id)->
-    @_add_composite GS.Rezisable.HORIZONTAL, item_id, parent_id
+  add_horizontal: (id, cfg)->
+    @_add_composite GS.Rezisable.HORIZONTAL, id, cfg
+
+  make_resize:(id, percent)-> 
+    item = @register[id]
+    unless item then throw new @UnregisteredIdentifier(id)
+    item.make_resize percent
+

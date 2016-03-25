@@ -15,6 +15,7 @@ Polymer
     listeners[GS.EVENTS.CHILD_RESIZE]        = '__forward_child_resize'
     listeners[GS.EVENTS.CHILD_RESIZE_FINISH] = '__forward_child_resize_finish'
     listeners[GS.EVENTS.CHILD_REMOVE]        = '__forward_child_remove'
+    listeners[GS.EVENTS.CHILD_MAKE_RESIZE]   = '__forward_child_make_resize'
     listeners
     
   __forward_child_resize_begin: (evnt)->
@@ -26,29 +27,31 @@ Polymer
   __forward_child_resize_finish: (evnt)->
     evnt.cancelBubble = true
     @__child_resize_finish(evnt.detail.context, evnt.detail.position)
+  __forward_child_make_resize: (evnt)->
+    evnt.cancelBubble = true
+    @__child_make_resize(evnt.detail.item, evnt.detail.percent)
   __forward_child_remove: (evnt)->
     evnt.cancelBubble = true
     @child_remove(evnt.detail.item)
       
   ready:->
-    @deferred = []
+    @deferred_panels = []
     @panelChildren = []
   
   get_children_tree: ->
     id: @identifier
-    items: (item.get_children_tree() for item in @panelChildren.concat(@deferred))
+    items: (item.get_children_tree() for item in @panelChildren.concat(@deferred_panels))
   
-  process_deferred:->
-    for deferred in @deferred
-      @add_panel_children deferred
-    @deferred.length = 0
+  process_deferred_panels:->
+    for deferred_panel in @deferred_panels
+      @add_panel_children deferred_panel
+    @deferred_panels.length = 0
   
   attached:->
-    @be_attached = true
     @orientation = @orientation or GS.HORIZONTAL
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
-    @process_deferred()
+    @process_deferred_panels()
     @__propagate_height_change 0, @fixedHeight
     
   _panel_children_change:->
@@ -57,14 +60,27 @@ Polymer
       child.index = index
       child.notLast = index isnt last_index
       
-  add_panel_children: (panel)->
+  next_index_by_position: (pos)->
+    len = @panelChildren.length
+    if len is 0 or pos is 'FIRST'
+      index = 0
+    else if pos is 'LAST' or not pos
+      index = len
+    else 
+      index = Math.floor(len/2)
+    index
+    
+  add_panel_children: (panel, pos)->
     if @be_attached
       panel.parentOrientation = @orientation
+      
       @_after_push panel, 0
-      @push 'panelChildren', panel
+      @splice 'panelChildren',
+        @next_index_by_position(pos), 0,
+        panel
       @_panel_children_change()
     else
-      @deferred.push panel
+      @deferred_panels.push panel
       
   child_remove: (item)->
     @_after_remove item
@@ -72,20 +88,35 @@ Polymer
     @_panel_children_change()
     @fire GS.EVENTS.UNREGISTER, item:item
     
-  add_composite: (ori, item_id)->
+  add_composite: (ori, item_id, pos)->
+    item_id ?= GS.Rezisable.next_id()
     next = document.createElement 'gs-panel-composite'
     next.orientation = ori
     next.identifier = item_id
-    @add_panel_children next
+    @add_panel_children next, pos
     next
   
-  add_simple: (element, item_id)->
+  add_simple: (element, item_id, pos)->
+    item_id ?= GS.Rezisable.next_id()
     next = document.createElement 'gs-panel-simple'
     element.identifier = item_id + '-concret-element'
-    next.concretElement = element
     next.identifier = item_id
-    @add_panel_children next
+    next.concretElement = element
+    @add_panel_children next, pos
     next
+  
+  HasBeenResized: do ->
+    error = () ->
+      this.name = 'HasBeenResized'
+      this.message = "Cannot set a percent programmatically once user has made a resize"
+    error.prototype = Error.prototype
+    error
+  ResizeNotAllowed: do ->
+    error = () ->
+      this.name = 'ResizeNotAllowed'
+      this.message = "Cannot exceed 100% size"
+    error.prototype = Error.prototype
+    error
   
   flow_strategies:
     horizontal:
@@ -108,6 +139,8 @@ Polymer
           @panelChildren[fix_width_index].panelWidth += child.panelWidth
         
       __child_resize_begin: (context, position)->
+        #has_been_resized: used to skip set_percent()
+        @has_been_resized = true
         #context.item cannot be the last child
         context.initial_mouse_x = position.clientX
         context.initial_width = context.item.clientWidth
@@ -143,7 +176,29 @@ Polymer
       __propagate_height_change:(newValue, oldValue)->
         for child in @panelChildren
           child.panelHeight = @fixedHeight
-
+          
+      __child_make_resize: (item, percent)->
+        if @has_been_resized then throw new @HasBeenResized()
+        available_space = 100
+        available_items = 0
+        for child in @panelChildren
+          if child is item then continue
+          if child.resize_data.forced_resize
+            available_space -= child.resize_data.width
+          else
+            available_items += 1
+        space_change = child.resize_data.width - percent
+        if available_space < space_change then throw new @ResizeNotAllowed()
+        space_change_per_child = space_change / available_items
+        count = 0
+        for child in @panelChildren
+          if child is item then continue
+          unless child.resize_data.forced_resize 
+            child.panelWidth = child.panelWidth + space_change_per_child
+          count += child.resize_data.width 
+        item.panelWidth = 100 - count
+        item.resize_data.forced_resize = percent
+        
     vertical:
       _after_push: (element)->
         current_amount = @panelChildren.length
@@ -186,7 +241,7 @@ Polymer
         for child in @panelChildren
           if child is fix_item then continue
           count += child.resize_data.height
-        fix_item.panelHeight = @fixedHeight - count 
+        fix_item.panelHeight = @fixedHeight - count
          
       __child_resize_finish: (context, position)->
         #context.item.style.transition = '0.5s'
@@ -203,6 +258,28 @@ Polymer
             count += child.resize_data.height
           last_height = @fixedHeight - count
           last_item.panelHeight = last_height
-        
+      
+      __child_make_resize: (item, percent)->
+        if @has_been_resized then throw new @HasBeenResized()
+        next_height = @fixedHeight / 100 * percent
+        available_space = @fixedHeight
+        available_items = 0
+        for child in @panelChildren
+          if child is item then continue
+          if child.resize_data.forced_resize
+            available_space -= child.resize_data.height
+          else
+            available_items += 1
+        space_change = child.resize_data.height - next_height
+        if available_space < space_change then throw new @ResizeNotAllowed()
+        space_change_per_child = space_change / available_items
+        count = 0
+        for child in @panelChildren
+          if child is item then continue
+          unless child.resize_data.forced_resize 
+            child.panelHeight = child.panelHeight + space_change_per_child
+          count += child.resize_data.height 
+        item.panelHeight = @fixedHeight - count
+        item.resize_data.forced_resize = next_height  
         
         

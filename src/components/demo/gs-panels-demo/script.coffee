@@ -20,6 +20,8 @@ Polymer
     classOptions:
       type: Array
       value: ['red', 'green', 'blue']
+    setPercentValue:
+      type: Number
     treeModel:
       type: String
       value: ''
@@ -35,6 +37,7 @@ Polymer
     'panelComplex.tap': '_add_panel_complex'
     'panelVertical.tap': '_add_panel_vertical'
     'panelHorizontal.tap': '_add_panel_horizontal'
+    'setPercentButton.tap': '_set_percent'
     'GS_PANELS_CHANGE': 'update_tree'
 
   ready:->
@@ -58,6 +61,9 @@ Polymer
   attached:->
     for hlevel, index in ['TOP','MIDDLE','BOTTOM']
       @generate_horizontal hlevel, index
+    @panels.make_resize 'TOP', 50
+    @panels.make_resize 'TOP_CENTER', 50
+    @panels.make_resize 'TOP_LEFT', 40
 
   _next_class_index_change:->
     @classOptions and @nextClass = @classOptions[@nextClassIndex]
@@ -76,7 +82,9 @@ Polymer
     item = document.createElement cfg.component_name
     item.elementClasses = cfg.klass
     item.elementName = cfg.self_id
-    @panels.add item, cfg.self_id, cfg.parent_id
+    @panels.add item, 
+      id: cfg.self_id
+      into: cfg.parent_id
     @update_tree()
 
   _add_form_panel: (component_name)->
@@ -92,11 +100,13 @@ Polymer
   _add_panel_complex: -> @_add_form_panel 'gs-panels-demo-item-flex'
 
   _add_panel_vertical: ->
-    @panels.add_vertical @nextId, @parentId
+    @panels.add_vertical @nextId,
+      into: @parentId
     @update_tree()
 
   _add_panel_horizontal: ->
-    @panels.add_horizontal @nextId, @parentId
+    @panels.add_horizontal @nextId,
+      into: @parentId
     @update_tree()
 
   _is_numeric: (value)->
@@ -113,3 +123,11 @@ Polymer
       @panels and @panels.style.height = @mainHeight + 'px'
     else
       @panels and @panels.style.height = 'auto'
+      
+  _set_percent:->
+    @panels.set_percent @nextId, @setPercentValue
+
+
+
+
+

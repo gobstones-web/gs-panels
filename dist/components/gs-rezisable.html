@@ -47,6 +47,13 @@
       HORIZONTAL: 'horizontal',
       VERTICAL: 'vertical',
       NOT_LAST_CLASS: 'not-last',
+      next_id: (function() {
+        var current;
+        current = 1111;
+        return function() {
+          return current++;
+        };
+      })(),
       created: function() {
         return this.resize_data = {};
       },
@@ -109,9 +116,26 @@
         this.style.height = in_px + 'px';
         return this.resize_data.height = this.parse_px(this.style.height);
       },
+      ready: function() {
+        return this.on_attach_once_callbacks = [];
+      },
+      has_been_attached: function() {
+        var callback, _i, _len, _ref;
+        this.be_attached = true;
+        _ref = this.on_attach_once_callbacks;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          callback = _ref[_i];
+          callback();
+        }
+        return this.on_attach_once_callbacks.length = 0;
+      },
       attached: function() {
+        this.has_been_attached();
         this.parentOrientation = this.parentOrientation || this.HORIZONTAL;
         return this.classList.add('child-of-' + this.parentOrientation);
+      },
+      on_attach_once: function(callback) {
+        return this.on_attach_once_callbacks.push(callback);
       },
       __on_begin_resize: function(evnt) {
         var context, mousemove, mouseup;
@@ -169,6 +193,22 @@
             clientY: polymer_event.clientY
           }
         });
+      },
+      make_resize: function(percent) {
+        var process;
+        process = (function(_this) {
+          return function() {
+            return _this.parentNode.fire(GS.EVENTS.CHILD_MAKE_RESIZE, {
+              item: _this,
+              percent: percent
+            });
+          };
+        })(this);
+        if (this.be_attached) {
+          return process();
+        } else {
+          return this.on_attach_once(process);
+        }
       }
     };
 

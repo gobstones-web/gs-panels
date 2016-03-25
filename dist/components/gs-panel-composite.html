@@ -51,6 +51,7 @@
         listeners[GS.EVENTS.CHILD_RESIZE] = '__forward_child_resize';
         listeners[GS.EVENTS.CHILD_RESIZE_FINISH] = '__forward_child_resize_finish';
         listeners[GS.EVENTS.CHILD_REMOVE] = '__forward_child_remove';
+        listeners[GS.EVENTS.CHILD_MAKE_RESIZE] = '__forward_child_make_resize';
         return listeners;
       })(),
       __forward_child_resize_begin: function(evnt) {
@@ -65,12 +66,16 @@
         evnt.cancelBubble = true;
         return this.__child_resize_finish(evnt.detail.context, evnt.detail.position);
       },
+      __forward_child_make_resize: function(evnt) {
+        evnt.cancelBubble = true;
+        return this.__child_make_resize(evnt.detail.item, evnt.detail.percent);
+      },
       __forward_child_remove: function(evnt) {
         evnt.cancelBubble = true;
         return this.child_remove(evnt.detail.item);
       },
       ready: function() {
-        this.deferred = [];
+        this.deferred_panels = [];
         return this.panelChildren = [];
       },
       get_children_tree: function() {
@@ -79,7 +84,7 @@
           id: this.identifier,
           items: (function() {
             var _i, _len, _ref, _results;
-            _ref = this.panelChildren.concat(this.deferred);
+            _ref = this.panelChildren.concat(this.deferred_panels);
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               item = _ref[_i];
@@ -89,21 +94,20 @@
           }).call(this)
         };
       },
-      process_deferred: function() {
-        var deferred, _i, _len, _ref;
-        _ref = this.deferred;
+      process_deferred_panels: function() {
+        var deferred_panel, _i, _len, _ref;
+        _ref = this.deferred_panels;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          deferred = _ref[_i];
-          this.add_panel_children(deferred);
+          deferred_panel = _ref[_i];
+          this.add_panel_children(deferred_panel);
         }
-        return this.deferred.length = 0;
+        return this.deferred_panels.length = 0;
       },
       attached: function() {
-        this.be_attached = true;
         this.orientation = this.orientation || GS.HORIZONTAL;
         this.classList.add(this.orientation);
         this.extend(this, this.flow_strategies[this.orientation]);
-        this.process_deferred();
+        this.process_deferred_panels();
         return this.__propagate_height_change(0, this.fixedHeight);
       },
       _panel_children_change: function() {
@@ -118,14 +122,26 @@
         }
         return _results;
       },
-      add_panel_children: function(panel) {
+      next_index_by_position: function(pos) {
+        var index, len;
+        len = this.panelChildren.length;
+        if (len === 0 || pos === 'FIRST') {
+          index = 0;
+        } else if (pos === 'LAST' || !pos) {
+          index = len;
+        } else {
+          index = Math.floor(len / 2);
+        }
+        return index;
+      },
+      add_panel_children: function(panel, pos) {
         if (this.be_attached) {
           panel.parentOrientation = this.orientation;
           this._after_push(panel, 0);
-          this.push('panelChildren', panel);
+          this.splice('panelChildren', this.next_index_by_position(pos), 0, panel);
           return this._panel_children_change();
         } else {
-          return this.deferred.push(panel);
+          return this.deferred_panels.push(panel);
         }
       },
       child_remove: function(item) {
@@ -136,23 +152,47 @@
           item: item
         });
       },
-      add_composite: function(ori, item_id) {
+      add_composite: function(ori, item_id, pos) {
         var next;
+        if (item_id == null) {
+          item_id = GS.Rezisable.next_id();
+        }
         next = document.createElement('gs-panel-composite');
         next.orientation = ori;
         next.identifier = item_id;
-        this.add_panel_children(next);
+        this.add_panel_children(next, pos);
         return next;
       },
-      add_simple: function(element, item_id) {
+      add_simple: function(element, item_id, pos) {
         var next;
+        if (item_id == null) {
+          item_id = GS.Rezisable.next_id();
+        }
         next = document.createElement('gs-panel-simple');
         element.identifier = item_id + '-concret-element';
-        next.concretElement = element;
         next.identifier = item_id;
-        this.add_panel_children(next);
+        next.concretElement = element;
+        this.add_panel_children(next, pos);
         return next;
       },
+      HasBeenResized: (function() {
+        var error;
+        error = function() {
+          this.name = 'HasBeenResized';
+          return this.message = "Cannot set a percent programmatically once user has made a resize";
+        };
+        error.prototype = Error.prototype;
+        return error;
+      })(),
+      ResizeNotAllowed: (function() {
+        var error;
+        error = function() {
+          this.name = 'ResizeNotAllowed';
+          return this.message = "Cannot exceed 100% size";
+        };
+        error.prototype = Error.prototype;
+        return error;
+      })(),
       flow_strategies: {
         horizontal: {
           _after_push: function(element) {
@@ -180,6 +220,7 @@
           },
           __child_resize_begin: function(context, position) {
             var next_item;
+            this.has_been_resized = true;
             context.initial_mouse_x = position.clientX;
             context.initial_width = context.item.clientWidth;
             context.initial_width_percent = this.parse_percent(context.item.style.width);
@@ -225,6 +266,45 @@
               _results.push(child.panelHeight = this.fixedHeight);
             }
             return _results;
+          },
+          __child_make_resize: function(item, percent) {
+            var available_items, available_space, child, count, space_change, space_change_per_child, _i, _j, _len, _len1, _ref, _ref1;
+            if (this.has_been_resized) {
+              throw new this.HasBeenResized();
+            }
+            available_space = 100;
+            available_items = 0;
+            _ref = this.panelChildren;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              if (child === item) {
+                continue;
+              }
+              if (child.resize_data.forced_resize) {
+                available_space -= child.resize_data.width;
+              } else {
+                available_items += 1;
+              }
+            }
+            space_change = child.resize_data.width - percent;
+            if (available_space < space_change) {
+              throw new this.ResizeNotAllowed();
+            }
+            space_change_per_child = space_change / available_items;
+            count = 0;
+            _ref1 = this.panelChildren;
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              child = _ref1[_j];
+              if (child === item) {
+                continue;
+              }
+              if (!child.resize_data.forced_resize) {
+                child.panelWidth = child.panelWidth + space_change_per_child;
+              }
+              count += child.resize_data.width;
+            }
+            item.panelWidth = 100 - count;
+            return item.resize_data.forced_resize = percent;
           }
         },
         vertical: {
@@ -287,10 +367,6 @@
           __child_resize_finish: function(context, position) {},
           __propagate_height_change: function(newValue, oldValue) {
             var amount, child, count, height_fixer, last_height, last_item, _i, _len, _ref;
-            console.log('newValue');
-            console.log(newValue);
-            console.log('oldValue');
-            console.log(oldValue);
             amount = this.panelChildren.length;
             if (amount > 0) {
               last_item = this.panelChildren[this.panelChildren.length - 1];
@@ -308,6 +384,46 @@
               last_height = this.fixedHeight - count;
               return last_item.panelHeight = last_height;
             }
+          },
+          __child_make_resize: function(item, percent) {
+            var available_items, available_space, child, count, next_height, space_change, space_change_per_child, _i, _j, _len, _len1, _ref, _ref1;
+            if (this.has_been_resized) {
+              throw new this.HasBeenResized();
+            }
+            next_height = this.fixedHeight / 100 * percent;
+            available_space = this.fixedHeight;
+            available_items = 0;
+            _ref = this.panelChildren;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              if (child === item) {
+                continue;
+              }
+              if (child.resize_data.forced_resize) {
+                available_space -= child.resize_data.height;
+              } else {
+                available_items += 1;
+              }
+            }
+            space_change = child.resize_data.height - next_height;
+            if (available_space < space_change) {
+              throw new this.ResizeNotAllowed();
+            }
+            space_change_per_child = space_change / available_items;
+            count = 0;
+            _ref1 = this.panelChildren;
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              child = _ref1[_j];
+              if (child === item) {
+                continue;
+              }
+              if (!child.resize_data.forced_resize) {
+                child.panelHeight = child.panelHeight + space_change_per_child;
+              }
+              count += child.resize_data.height;
+            }
+            item.panelHeight = this.fixedHeight - count;
+            return item.resize_data.forced_resize = next_height;
           }
         }
       }
