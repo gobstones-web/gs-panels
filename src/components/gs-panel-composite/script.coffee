@@ -49,14 +49,13 @@ Polymer
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
     @process_deferred()
-    @__propagate_height_change()
+    @__propagate_height_change 0, @fixedHeight
     
   _panel_children_change:->
     last_index = @panelChildren.length - 1
     for child, index in @panelChildren
       child.index = index
       child.notLast = index isnt last_index
-    @__propagate_height_change()
       
   add_panel_children: (panel)->
     if @be_attached
@@ -87,15 +86,17 @@ Polymer
     next.identifier = item_id
     @add_panel_children next
     next
-
+  
   flow_strategies:
     horizontal:
       _after_push: (element)->
-        amount = @panelChildren.length + 1
+        #element is not added yet
+        current_amount = @panelChildren.length
+        next_amount = @panelChildren.length + 1
+        width_fixer = current_amount / next_amount
         count = 0
-        average = 100 / amount
         for child in @panelChildren
-          child.panelWidth = average
+          child.panelWidth = child.panelWidth * width_fixer
           count += child.resize_data.width
         last_width = 100 - count
         element.panelWidth = last_width
@@ -137,22 +138,22 @@ Polymer
           if child is fix_item
             continue
           count += child.resize_data.width
-        fix_item.panelWidth = 100 - count   
+        fix_item.panelWidth = 100 - count
         
-      __propagate_height_change:->
-        for child in @panelChildren 
+      __propagate_height_change:(newValue, oldValue)->
+        for child in @panelChildren
           child.panelHeight = @fixedHeight
 
     vertical:
       _after_push: (element)->
-        amount = @panelChildren.length + 1
+        current_amount = @panelChildren.length
+        next_amount = @panelChildren.length + 1
+        height_fixer = current_amount / next_amount
         count = 0
-        total = @fixedHeight
-        average = total / amount
         for child in @panelChildren
-          child.panelHeight = average
+          child.panelHeight = child.panelHeight * height_fixer
           count += child.resize_data.height
-        last_height = total - count
+        last_height = @fixedHeight - count
         element.panelHeight = last_height
         
       _after_remove: (child)->
@@ -190,17 +191,18 @@ Polymer
       __child_resize_finish: (context, position)->
         #context.item.style.transition = '0.5s'
       
-      __propagate_height_change:->
+      __propagate_height_change:(newValue, oldValue)->
         amount = @panelChildren.length
         if amount > 0
-          last_item = @panelChildren[amount - 1]
+          last_item = @panelChildren[@panelChildren.length - 1]
+          height_fixer = newValue / oldValue
           count = 0
-          total = @fixedHeight
-          average = total / amount
           for child in @panelChildren
             if child is last_item then continue
-            child.panelHeight = average
+            child.panelHeight = child.panelHeight * height_fixer
             count += child.resize_data.height
-          last_height = total - count
+          last_height = @fixedHeight - count
           last_item.panelHeight = last_height
+        
+        
         

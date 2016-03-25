@@ -66,10 +66,10 @@ GS.Rezisable =
     else
       @fixedHeight = @panelHeight
   
-  __fixed_height_change: ->
-    @__propagate_height_change()
+  __fixed_height_change:(newValue, oldValue) ->
+    @__propagate_height_change(newValue, oldValue)
     
-  __propagate_height_change: ->
+  __propagate_height_change: (newValue, oldValue)->
     
   __panel_height_change: ->
     @__set_height_px @panelHeight

@@ -88,10 +88,10 @@
           return this.fixedHeight = this.panelHeight;
         }
       },
-      __fixed_height_change: function() {
-        return this.__propagate_height_change();
+      __fixed_height_change: function(newValue, oldValue) {
+        return this.__propagate_height_change(newValue, oldValue);
       },
-      __propagate_height_change: function() {},
+      __propagate_height_change: function(newValue, oldValue) {},
       __panel_height_change: function() {
         this.__set_height_px(this.panelHeight);
         return this.__update_fixed_height();

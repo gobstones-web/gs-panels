@@ -104,18 +104,19 @@
         this.classList.add(this.orientation);
         this.extend(this, this.flow_strategies[this.orientation]);
         this.process_deferred();
-        return this.__propagate_height_change();
+        return this.__propagate_height_change(0, this.fixedHeight);
       },
       _panel_children_change: function() {
-        var child, index, last_index, _i, _len, _ref;
+        var child, index, last_index, _i, _len, _ref, _results;
         last_index = this.panelChildren.length - 1;
         _ref = this.panelChildren;
+        _results = [];
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           child = _ref[index];
           child.index = index;
-          child.notLast = index !== last_index;
+          _results.push(child.notLast = index !== last_index);
         }
-        return this.__propagate_height_change();
+        return _results;
       },
       add_panel_children: function(panel) {
         if (this.be_attached) {
@@ -155,14 +156,15 @@
       flow_strategies: {
         horizontal: {
           _after_push: function(element) {
-            var amount, average, child, count, last_width, _i, _len, _ref;
-            amount = this.panelChildren.length + 1;
+            var child, count, current_amount, last_width, next_amount, width_fixer, _i, _len, _ref;
+            current_amount = this.panelChildren.length;
+            next_amount = this.panelChildren.length + 1;
+            width_fixer = current_amount / next_amount;
             count = 0;
-            average = 100 / amount;
             _ref = this.panelChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
-              child.panelWidth = average;
+              child.panelWidth = child.panelWidth * width_fixer;
               count += child.resize_data.width;
             }
             last_width = 100 - count;
@@ -214,7 +216,7 @@
             }
             return fix_item.panelWidth = 100 - count;
           },
-          __propagate_height_change: function() {
+          __propagate_height_change: function(newValue, oldValue) {
             var child, _i, _len, _ref, _results;
             _ref = this.panelChildren;
             _results = [];
@@ -227,18 +229,18 @@
         },
         vertical: {
           _after_push: function(element) {
-            var amount, average, child, count, last_height, total, _i, _len, _ref;
-            amount = this.panelChildren.length + 1;
+            var child, count, current_amount, height_fixer, last_height, next_amount, _i, _len, _ref;
+            current_amount = this.panelChildren.length;
+            next_amount = this.panelChildren.length + 1;
+            height_fixer = current_amount / next_amount;
             count = 0;
-            total = this.fixedHeight;
-            average = total / amount;
             _ref = this.panelChildren;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               child = _ref[_i];
-              child.panelHeight = average;
+              child.panelHeight = child.panelHeight * height_fixer;
               count += child.resize_data.height;
             }
-            last_height = total - count;
+            last_height = this.fixedHeight - count;
             return element.panelHeight = last_height;
           },
           _after_remove: function(child) {
@@ -283,24 +285,27 @@
             return fix_item.panelHeight = this.fixedHeight - count;
           },
           __child_resize_finish: function(context, position) {},
-          __propagate_height_change: function() {
-            var amount, average, child, count, last_height, last_item, total, _i, _len, _ref;
+          __propagate_height_change: function(newValue, oldValue) {
+            var amount, child, count, height_fixer, last_height, last_item, _i, _len, _ref;
+            console.log('newValue');
+            console.log(newValue);
+            console.log('oldValue');
+            console.log(oldValue);
             amount = this.panelChildren.length;
             if (amount > 0) {
-              last_item = this.panelChildren[amount - 1];
+              last_item = this.panelChildren[this.panelChildren.length - 1];
+              height_fixer = newValue / oldValue;
               count = 0;
-              total = this.fixedHeight;
-              average = total / amount;
               _ref = this.panelChildren;
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 child = _ref[_i];
                 if (child === last_item) {
                   continue;
                 }
-                child.panelHeight = average;
+                child.panelHeight = child.panelHeight * height_fixer;
                 count += child.resize_data.height;
               }
-              last_height = total - count;
+              last_height = this.fixedHeight - count;
               return last_item.panelHeight = last_height;
             }
           }
