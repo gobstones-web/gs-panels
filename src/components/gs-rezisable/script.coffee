@@ -26,6 +26,7 @@ GS.Rezisable =
   listeners: do ->
     listeners = {}
     listeners[GS.EVENTS.RESIZE_BEGIN] = '__on_begin_resize'
+    listeners[GS.EVENTS.RESIZER_SUBSCRIBE] = '__resizer_subscribe'
     listeners
     
   HORIZONTAL: 'horizontal'
@@ -57,6 +58,7 @@ GS.Rezisable =
       value = in_percent
     value
     
+    
   __not_last_change:->
     if @notLast
       @classList.add @NOT_LAST_CLASS
@@ -66,7 +68,8 @@ GS.Rezisable =
   
   __update_fixed_height: ->
     if @parentOrientation is GS.Rezisable.VERTICAL and @notLast
-      @fixedHeight = @panelHeight - 7
+      ofsset = @resizer_elem and @resizer_elem.clientHeight or 0
+      @fixedHeight = @panelHeight - ofsset
     else
       @fixedHeight = @panelHeight
   
@@ -109,7 +112,11 @@ GS.Rezisable =
   
   on_attach_once:(callback)->
     @on_attach_once_callbacks.push callback
-      
+  
+  __resizer_subscribe:(polymer_event)->
+    evnt.cancelBubble = true
+    @resizer_elem = polymer_event.detail.item
+        
   __on_begin_resize: (evnt)->
     evnt.cancelBubble = true
     evnt.preventDefault()

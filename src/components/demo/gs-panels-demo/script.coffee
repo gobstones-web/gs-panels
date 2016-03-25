@@ -8,6 +8,9 @@ Polymer
     mainHeight:
       type: Number
       observer: '_main_height_change'
+    panelHeight:
+      type: Number
+      observer: '_panel_height_change'
     nextClass:
       type: String
     nextClassIndex:
@@ -124,9 +127,14 @@ Polymer
     else
       @panels and @panels.style.height = 'auto'
       
+  _panel_height_change: ->
+    if @_is_numeric(@panelHeight)
+      @panels and @panels.rootHeight = @panelHeight
+    else
+      @panels and @panels.rootHeight = 0
+      
   _set_percent:->
-    @panels.set_percent @nextId, @setPercentValue
-
+    @panels.make_resize @nextId, @setPercentValue
 
 
 

@@ -100,6 +100,8 @@
         <input is="iron-input" bind-value="{{mainWidth}}" /><br/>
         <span>Container Height (0 = auto, current min-heigth = 20px): </span><br/>
         <input is="iron-input" bind-value="{{mainHeight}}" /><br/>
+        <span>Panel Height (> minHeightSupported): </span><br/>
+        <input is="iron-input" bind-value="{{panelHeight}}" /><br/>
         <paper-checkbox checked="{{showLeftBlock}}">Show left block</paper-checkbox><br/>
         <paper-menu-button class="class-options">
           <paper-button class$="dropdown-trigger {{nextClass}}" raised>
@@ -152,6 +154,10 @@
         mainHeight: {
           type: Number,
           observer: '_main_height_change'
+        },
+        panelHeight: {
+          type: Number,
+          observer: '_panel_height_change'
         },
         nextClass: {
           type: String
@@ -300,8 +306,15 @@
           return this.panels && (this.panels.style.height = 'auto');
         }
       },
+      _panel_height_change: function() {
+        if (this._is_numeric(this.panelHeight)) {
+          return this.panels && (this.panels.rootHeight = this.panelHeight);
+        } else {
+          return this.panels && (this.panels.rootHeight = 0);
+        }
+      },
       _set_percent: function() {
-        return this.panels.set_percent(this.nextId, this.setPercentValue);
+        return this.panels.make_resize(this.nextId, this.setPercentValue);
       }
     });
 

@@ -73,6 +73,11 @@
           clientX: evnt.clientX,
           clientY: evnt.clientY
         });
+      },
+      attached: function() {
+        return this.fire(GS.EVENTS.RESIZER_SUBSCRIBE, {
+          item: this
+        });
       }
     });
 

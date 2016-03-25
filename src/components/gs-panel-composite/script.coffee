@@ -187,7 +187,7 @@ Polymer
             available_space -= child.resize_data.width
           else
             available_items += 1
-        space_change = child.resize_data.width - percent
+        space_change = item.resize_data.width - percent
         if available_space < space_change then throw new @ResizeNotAllowed()
         space_change_per_child = space_change / available_items
         count = 0
@@ -270,7 +270,7 @@ Polymer
             available_space -= child.resize_data.height
           else
             available_items += 1
-        space_change = child.resize_data.height - next_height
+        space_change = item.resize_data.height - next_height
         if available_space < space_change then throw new @ResizeNotAllowed()
         space_change_per_child = space_change / available_items
         count = 0

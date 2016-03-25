@@ -9,4 +9,7 @@ Polymer
     @fire GS.EVENTS.RESIZE_BEGIN,
       clientX: evnt.clientX
       clientY: evnt.clientY
-    
+  
+  attached: ->
+    @fire GS.EVENTS.RESIZER_SUBSCRIBE,
+      item: @

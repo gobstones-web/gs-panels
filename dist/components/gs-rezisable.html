@@ -42,6 +42,7 @@
         var listeners;
         listeners = {};
         listeners[GS.EVENTS.RESIZE_BEGIN] = '__on_begin_resize';
+        listeners[GS.EVENTS.RESIZER_SUBSCRIBE] = '__resizer_subscribe';
         return listeners;
       })(),
       HORIZONTAL: 'horizontal',
@@ -89,8 +90,10 @@
         return this.__update_fixed_height();
       },
       __update_fixed_height: function() {
+        var ofsset;
         if (this.parentOrientation === GS.Rezisable.VERTICAL && this.notLast) {
-          return this.fixedHeight = this.panelHeight - 7;
+          ofsset = this.resizer_elem && this.resizer_elem.clientHeight || 0;
+          return this.fixedHeight = this.panelHeight - ofsset;
         } else {
           return this.fixedHeight = this.panelHeight;
         }
@@ -136,6 +139,10 @@
       },
       on_attach_once: function(callback) {
         return this.on_attach_once_callbacks.push(callback);
+      },
+      __resizer_subscribe: function(polymer_event) {
+        evnt.cancelBubble = true;
+        return this.resizer_elem = polymer_event.detail.item;
       },
       __on_begin_resize: function(evnt) {
         var context, mousemove, mouseup;

@@ -57,7 +57,8 @@
           value: GS.Rezisable.VERTICAL
         },
         rootHeight: {
-          type: Number
+          type: Number,
+          observer: '_root_height_change'
         },
         childHeight: {
           type: Number,
@@ -121,11 +122,18 @@
           return this.container.classList.remove('debug');
         }
       },
+      _root_height_change: function() {
+        if (this.rootHeight > this.minHeightSupported) {
+          this.childHeight = this.rootHeight - this.resizer.clientHeight;
+          this.heightFixer.style.minHeight = this.childHeight + 'px';
+          return this.style.maxHeight = this.rootHeight + 'px';
+        }
+      },
       begin_resize: function(context, evnt) {
         context.outside_resize = 0;
         context.minHeightPX = this.molt(this.heightFixer).minHeight;
         context.resizerHeight = this.resizer.clientHeight;
-        context.initial_frame_heigth = this.clientHeight;
+        context.initial_frame_height = this.clientHeight;
         context.initial_window_scroll_y = window.scrollY;
         context.initial_mouse_y = evnt.detail.clientY;
         context.on_resize_fixer_height = document.documentElement.clientHeight - evnt.detail.clientY;
@@ -133,7 +141,7 @@
       },
       safe_set_height: function(context, y_delta) {
         var nextHeight, next_resizer_height;
-        nextHeight = context.initial_frame_heigth + context.outside_resize + y_delta;
+        nextHeight = context.initial_frame_height + context.outside_resize + y_delta;
         if (nextHeight > this.minHeightSupported) {
           this.childHeight = nextHeight - context.resizerHeight;
           this.heightFixer.style.minHeight = this.childHeight + 'px';
@@ -150,13 +158,10 @@
         var next_scroll_y, next_time;
         if (!permission.cancel) {
           context.outside_resize += this.RESIZE_DELTA;
+          this.safe_set_height(context, y_delta);
           next_scroll_y = context.initial_window_scroll_y + context.outside_resize;
           window.scrollTo(window.scrollX, next_scroll_y);
-          console.log(window.scrollY);
-          this.safe_set_height(context, y_delta);
-          this.resizing = permission = {
-            cancel: true
-          };
+          this.resizing = permission = {};
           next_time = (function(_this) {
             return function() {
               return _this.auto_resize(permission, context, y_delta);
@@ -267,7 +272,7 @@
         if (!item) {
           throw new this.UnregisteredIdentifier(id);
         }
-        return item.make_resize(percent);
+        return item.make_resize(parseInt(percent));
       }
     });
 

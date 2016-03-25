@@ -15,6 +15,7 @@ Polymer
       #value: GS.Rezisable.HORIZONTAL
     rootHeight:
       type: Number
+      observer: '_root_height_change'
     childHeight:
       type: Number
       observer: 'child_height_change'
@@ -84,7 +85,13 @@ Polymer
       @container.classList.add 'debug'
     else
       @container.classList.remove 'debug'
-
+        
+  _root_height_change:->
+    if @rootHeight > @minHeightSupported
+      @childHeight = (@rootHeight - @resizer.clientHeight)
+      @heightFixer.style.minHeight = @childHeight + 'px'
+      @style.maxHeight = @rootHeight + 'px'
+    
   begin_resize:(context, evnt)->
     #outside_resize: represent the height in pixel that was resized in outside mode
     context.outside_resize = 0 
@@ -93,7 +100,7 @@ Polymer
     #resizerHeight: initial resizer height 
     context.resizerHeight = @resizer.clientHeight
     #minHeightPX: the initial root-panel height
-    context.initial_frame_heigth = @clientHeight
+    context.initial_frame_height = @clientHeight
     #initial_window_scroll_y: initial scroll vertical position
     context.initial_window_scroll_y = window.scrollY
     #initial_mouse_y: the initial clientY value
@@ -104,7 +111,7 @@ Polymer
     @style.transition = 'none'
   
   safe_set_height:(context, y_delta)->
-    nextHeight = context.initial_frame_heigth + context.outside_resize + y_delta
+    nextHeight = context.initial_frame_height + context.outside_resize + y_delta
     if nextHeight > @minHeightSupported
       @childHeight = (nextHeight - context.resizerHeight)
       @heightFixer.style.minHeight = @childHeight + 'px'
@@ -119,11 +126,10 @@ Polymer
   auto_resize:(permission, context, y_delta)->
     unless permission.cancel
       context.outside_resize += @RESIZE_DELTA
+      @safe_set_height(context, y_delta)
       next_scroll_y = context.initial_window_scroll_y + context.outside_resize
       window.scrollTo(window.scrollX, next_scroll_y)
-      console.log window.scrollY
-      @safe_set_height(context, y_delta)
-      @resizing = permission = {cancel: true}
+      @resizing = permission = {}
       next_time = => @auto_resize(permission, context, y_delta)
       window.setTimeout next_time, @RESIZE_DELAY
     
@@ -205,5 +211,5 @@ Polymer
   make_resize:(id, percent)-> 
     item = @register[id]
     unless item then throw new @UnregisteredIdentifier(id)
-    item.make_resize percent
+    item.make_resize parseInt(percent)
 
