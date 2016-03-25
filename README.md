@@ -27,11 +27,19 @@ Polymer({
   is: 'my-custom-container',
   
   attached:function(){
-    this.$.panels.add_horizontal 'HORIZONTAL_CONTAINER';
+    this.$.panels.add_horizontal('HORIZONTAL_CONTAINER');
     var custom_component = document.createElement('custom-component');
-    this.panels.add custom_component, 'CUSTOM-COMPONENT-ID', 'HORIZONTAL_CONTAINER'
+    this.$.panels.add(custom_component, {
+      id:'CUSTOM-COMPONENT-ID', 
+      into:'HORIZONTAL_CONTAINER'
+    });
     var other_component = document.createElement('other-component');
-    this.panels.add other_component, 'OTHER-COMPONENT-ID', 'HORIZONTAL_CONTAINER'
+    this.$.panels.add(other_component, {
+      id:'OTHER-COMPONENT-ID', 
+      into:'HORIZONTAL_CONTAINER'
+    });
+    //set 70% width
+    this.$.panels.make_resize('OTHER-COMPONENT-ID', 70)
   }
     
 });
