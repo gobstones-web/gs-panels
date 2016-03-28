@@ -65,8 +65,8 @@ Polymer
     for hlevel, index in ['TOP','MIDDLE','BOTTOM']
       @generate_horizontal hlevel, index
     @panels.make_resize 'TOP', 50
-    @panels.make_resize 'TOP_CENTER', 50
-    @panels.make_resize 'TOP_LEFT', 40
+    @panels.make_resize 'TOP_CENTER', 90
+    @panels.make_resize 'TOP_LEFT', 5
 
   _next_class_index_change:->
     @classOptions and @nextClass = @classOptions[@nextClassIndex]

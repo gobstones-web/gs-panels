@@ -67,7 +67,8 @@ Polymer
         next_height = MAX_HEIGHT
       maxHeight = (next_height + resizer_h) + 'px'
       @childHeight = next_height
-    @style.maxHeight = maxHeight
+    @style.maxHeight = 'none'
+    @style.height = 'none'
 
   get_children_tree:->
     #API method
@@ -89,8 +90,6 @@ Polymer
   _root_height_change:->
     if @rootHeight > @minHeightSupported
       @childHeight = (@rootHeight - @resizer.clientHeight)
-      @heightFixer.style.minHeight = @childHeight + 'px'
-      @style.maxHeight = @rootHeight + 'px'
     
   begin_resize:(context, evnt)->
     #outside_resize: represent the height in pixel that was resized in outside mode
@@ -113,9 +112,9 @@ Polymer
   safe_set_height:(context, y_delta)->
     nextHeight = context.initial_frame_height + context.outside_resize + y_delta
     if nextHeight > @minHeightSupported
-      @childHeight = (nextHeight - context.resizerHeight)
+      @rootHeight = nextHeight
       @heightFixer.style.minHeight = @childHeight + 'px'
-      @style.maxHeight = nextHeight + 'px'
+      #@style.maxHeight = nextHeight + 'px'
       next_resizer_height = context.on_resize_fixer_height
       next_resizer_height -= y_delta
       #next_resizer_height -= context.outside_resize

@@ -7,7 +7,6 @@
       :host {
         display: block;
         width: 100%;
-        background-color: #BBB;
       }
       :host #heightFixer {
         width: 100%;
@@ -103,7 +102,8 @@
           maxHeight = (next_height + resizer_h) + 'px';
           this.childHeight = next_height;
         }
-        return this.style.maxHeight = maxHeight;
+        this.style.maxHeight = 'none';
+        return this.style.height = 'none';
       },
       get_children_tree: function() {
         return this.main.get_children_tree();
@@ -124,9 +124,7 @@
       },
       _root_height_change: function() {
         if (this.rootHeight > this.minHeightSupported) {
-          this.childHeight = this.rootHeight - this.resizer.clientHeight;
-          this.heightFixer.style.minHeight = this.childHeight + 'px';
-          return this.style.maxHeight = this.rootHeight + 'px';
+          return this.childHeight = this.rootHeight - this.resizer.clientHeight;
         }
       },
       begin_resize: function(context, evnt) {
@@ -143,9 +141,8 @@
         var nextHeight, next_resizer_height;
         nextHeight = context.initial_frame_height + context.outside_resize + y_delta;
         if (nextHeight > this.minHeightSupported) {
-          this.childHeight = nextHeight - context.resizerHeight;
+          this.rootHeight = nextHeight;
           this.heightFixer.style.minHeight = this.childHeight + 'px';
-          this.style.maxHeight = nextHeight + 'px';
           next_resizer_height = context.on_resize_fixer_height;
           next_resizer_height -= y_delta;
           if (next_resizer_height < 0) {

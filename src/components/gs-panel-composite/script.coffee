@@ -1,7 +1,7 @@
 Polymer
   is: '#GRUNT_COMPONENT_NAME'
   
-  MIN_WIDTH: 150
+  MIN_WIDTH: 50
   MIN_HEIGHT: 50
   
   properties: 
