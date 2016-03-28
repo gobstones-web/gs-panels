@@ -116,7 +116,6 @@ GS.Rezisable =
   __resizer_subscribe:(polymer_event)->
     polymer_event.cancelBubble = true
     @resizer_elem = polymer_event.detail.item
-    console.log 'register'
     @__update_fixed_height()
         
   __on_begin_resize: (evnt)->

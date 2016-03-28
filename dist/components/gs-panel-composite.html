@@ -84,7 +84,7 @@
           id: this.identifier,
           items: (function() {
             var _i, _len, _ref, _results;
-            _ref = this.panelChildren.concat(this.deferred_panels);
+            _ref = this.panelChildren.concat(this.collect_deferred_panels());
             _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               item = _ref[_i];
@@ -95,11 +95,11 @@
         };
       },
       process_deferred_panels: function() {
-        var deferred_panel, _i, _len, _ref;
+        var deferred, _i, _len, _ref;
         _ref = this.deferred_panels;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          deferred_panel = _ref[_i];
-          this.add_panel_children(deferred_panel);
+          deferred = _ref[_i];
+          this.add_panel_children(deferred.panel, deferred.pos);
         }
         return this.deferred_panels.length = 0;
       },
@@ -108,7 +108,7 @@
         this.classList.add(this.orientation);
         this.extend(this, this.flow_strategies[this.orientation]);
         this.process_deferred_panels();
-        return this.__propagate_height_change(0, this.fixedHeight);
+        return this.__propagate_height_change(this.fixedHeight, 0);
       },
       _panel_children_change: function() {
         var child, index, last_index, _i, _len, _ref, _results;
@@ -135,14 +135,29 @@
         return index;
       },
       add_panel_children: function(panel, pos) {
+        var deferred;
         if (this.be_attached) {
           panel.parentOrientation = this.orientation;
           this._after_push(panel, 0);
           this.splice('panelChildren', this.next_index_by_position(pos), 0, panel);
           return this._panel_children_change();
         } else {
-          return this.deferred_panels.push(panel);
+          deferred = {
+            panel: panel,
+            pos: pos
+          };
+          return this.deferred_panels.push(deferred);
         }
+      },
+      collect_deferred_panels: function() {
+        var deferred, _i, _len, _ref, _results;
+        _ref = this.deferred_panels;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          deferred = _ref[_i];
+          _results.push(deferred.panel);
+        }
+        return _results;
       },
       child_remove: function(item) {
         this._after_remove(item);
@@ -219,13 +234,16 @@
             }
           },
           __child_resize_begin: function(context, position) {
-            var next_item;
+            var current_width, expand_width, next_item;
             this.has_been_resized = true;
             context.initial_mouse_x = position.clientX;
             context.initial_width = context.item.clientWidth;
             context.initial_width_percent = this.parse_percent(context.item.style.width);
             next_item = this.panelChildren[context.item.index + 1];
-            context.max_width = context.item.clientWidth + next_item.clientWidth - this.MIN_WIDTH;
+            current_width = context.item.clientWidth;
+            context.min_width = this.MIN_WIDTH < current_width ? this.MIN_WIDTH : current_width;
+            expand_width = next_item.clientWidth < this.MIN_WIDTH ? 0 : next_item.clientWidth - this.MIN_WIDTH;
+            context.max_width = current_width + expand_width;
             return context.item.style.transition = 'none';
           },
           __child_resize: function(context, position) {
@@ -236,8 +254,8 @@
             if (next_px > context.max_width) {
               next_px = context.max_width;
             }
-            if (next_px < this.MIN_WIDTH) {
-              next_px = this.MIN_WIDTH;
+            if (next_px < context.min_width) {
+              next_px = context.min_width;
             }
             next_percent = context.initial_width_percent * next_px / context.initial_width;
             context.item.panelWidth = next_percent;
@@ -366,20 +384,33 @@
           },
           __child_resize_finish: function(context, position) {},
           __propagate_height_change: function(newValue, oldValue) {
-            var amount, child, count, height_fixer, last_height, last_item, _i, _len, _ref;
+            var amount, child, child_height, count, height_fixer, last_height, last_item, _i, _j, _len, _len1, _ref, _ref1;
             amount = this.panelChildren.length;
             if (amount > 0) {
               last_item = this.panelChildren[this.panelChildren.length - 1];
-              height_fixer = newValue / oldValue;
               count = 0;
-              _ref = this.panelChildren;
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                child = _ref[_i];
-                if (child === last_item) {
-                  continue;
+              if (oldValue === 0) {
+                child_height = newValue / amount;
+                _ref = this.panelChildren;
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                  child = _ref[_i];
+                  if (child === last_item) {
+                    continue;
+                  }
+                  child.panelHeight = child_height;
+                  count += child.resize_data.height;
                 }
-                child.panelHeight = child.panelHeight * height_fixer;
-                count += child.resize_data.height;
+              } else {
+                height_fixer = newValue / oldValue;
+                _ref1 = this.panelChildren;
+                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                  child = _ref1[_j];
+                  if (child === last_item) {
+                    continue;
+                  }
+                  child.panelHeight = child.panelHeight * height_fixer;
+                  count += child.resize_data.height;
+                }
               }
               last_height = this.fixedHeight - count;
               return last_item.panelHeight = last_height;

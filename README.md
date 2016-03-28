@@ -14,7 +14,7 @@ grunt server
 
 listen on `GS_PANELS_CHANGE` to detect changes in panels tree
 
-Children can implement 'panelHeight' property or listen on 'GS_HAS_BEEN_RESIZED' in order to detect resize.
+Children can implement 'panelHeight' property in order to detect resize.
 
 ## using
 

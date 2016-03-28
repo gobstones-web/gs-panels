@@ -40,11 +40,11 @@ Polymer
   
   get_children_tree: ->
     id: @identifier
-    items: (item.get_children_tree() for item in @panelChildren.concat(@deferred_panels))
+    items: (item.get_children_tree() for item in @panelChildren.concat(@collect_deferred_panels()))
   
   process_deferred_panels:->
-    for deferred_panel in @deferred_panels
-      @add_panel_children deferred_panel
+    for deferred in @deferred_panels
+      @add_panel_children deferred.panel, deferred.pos
     @deferred_panels.length = 0
   
   attached:->
@@ -52,7 +52,7 @@ Polymer
     @classList.add @orientation 
     @extend @, @flow_strategies[@orientation]
     @process_deferred_panels()
-    @__propagate_height_change 0, @fixedHeight
+    @__propagate_height_change @fixedHeight, 0
     
   _panel_children_change:->
     last_index = @panelChildren.length - 1
@@ -80,7 +80,13 @@ Polymer
         panel
       @_panel_children_change()
     else
-      @deferred_panels.push panel
+      deferred = 
+        panel: panel
+        pos: pos
+      @deferred_panels.push deferred
+      
+  collect_deferred_panels: ->
+    deferred.panel for deferred in @deferred_panels
       
   child_remove: (item)->
     @_after_remove item
@@ -104,20 +110,21 @@ Polymer
     next.concretElement = element
     @add_panel_children next, pos
     next
-  
+
   HasBeenResized: do ->
     error = () ->
       this.name = 'HasBeenResized'
       this.message = "Cannot set a percent programmatically once user has made a resize"
     error.prototype = Error.prototype
     error
+
   ResizeNotAllowed: do ->
     error = () ->
       this.name = 'ResizeNotAllowed'
       this.message = "Cannot exceed 100% size"
     error.prototype = Error.prototype
     error
-  
+
   flow_strategies:
     horizontal:
       _after_push: (element)->
@@ -139,14 +146,17 @@ Polymer
           @panelChildren[fix_width_index].panelWidth += child.panelWidth
         
       __child_resize_begin: (context, position)->
-        #has_been_resized: used to skip set_percent()
+        #has_been_resized: used to skip make_resize()
         @has_been_resized = true
         #context.item cannot be the last child
         context.initial_mouse_x = position.clientX
         context.initial_width = context.item.clientWidth
         context.initial_width_percent = @parse_percent context.item.style.width
         next_item = @panelChildren[context.item.index + 1]
-        context.max_width = context.item.clientWidth + next_item.clientWidth - @MIN_WIDTH
+        current_width = context.item.clientWidth
+        context.min_width = if @MIN_WIDTH < current_width then @MIN_WIDTH else current_width
+        expand_width = if next_item.clientWidth < @MIN_WIDTH then 0 else next_item.clientWidth - @MIN_WIDTH
+        context.max_width = current_width + expand_width
         context.item.style.transition = 'none'
 
       __child_resize: (context, position)->
@@ -156,8 +166,8 @@ Polymer
         next_px = context.initial_width + x_delta
         if next_px > context.max_width
           next_px = context.max_width
-        if next_px < @MIN_WIDTH
-          next_px = @MIN_WIDTH
+        if next_px < context.min_width
+          next_px = context.min_width
         next_percent = context.initial_width_percent * next_px / context.initial_width
         context.item.panelWidth = next_percent
         @__fix_width_against @panelChildren[context.item.index + 1]
@@ -250,12 +260,19 @@ Polymer
         amount = @panelChildren.length
         if amount > 0
           last_item = @panelChildren[@panelChildren.length - 1]
-          height_fixer = newValue / oldValue
           count = 0
-          for child in @panelChildren
-            if child is last_item then continue
-            child.panelHeight = child.panelHeight * height_fixer
-            count += child.resize_data.height
+          if oldValue is 0
+            child_height = newValue / amount
+            for child in @panelChildren
+              if child is last_item then continue
+              child.panelHeight = child_height
+              count += child.resize_data.height
+          else  
+            height_fixer = newValue / oldValue
+            for child in @panelChildren
+              if child is last_item then continue
+              child.panelHeight = child.panelHeight * height_fixer
+              count += child.resize_data.height
           last_height = @fixedHeight - count
           last_item.panelHeight = last_height
       

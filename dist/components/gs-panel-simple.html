@@ -116,14 +116,10 @@
       attached: function() {
         return this.__propagate_height_change();
       },
-      detached: function() {},
       __propagate_height_change: function() {
         if (this.concretElement) {
           this.concretElement.style.height = this.fixedHeight + 'px';
-          this.concretElement.panelHeight = this.fixedHeight;
-          return this.concretElement.fire(GS.EVENTS.HAS_BEEN_RESIZED, null, {
-            bubbles: false
-          });
+          return this.concretElement.panelHeight = this.fixedHeight;
         }
       },
       get_children_tree: function() {

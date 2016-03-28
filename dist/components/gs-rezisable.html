@@ -143,7 +143,6 @@
       __resizer_subscribe: function(polymer_event) {
         polymer_event.cancelBubble = true;
         this.resizer_elem = polymer_event.detail.item;
-        console.log('register');
         return this.__update_fixed_height();
       },
       __on_begin_resize: function(evnt) {

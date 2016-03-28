@@ -15,14 +15,11 @@ Polymer
   attached: ->
     @__propagate_height_change()
     
-  detached:->
-    
   __propagate_height_change: ->
     #skiping height propagation before attach
     if @concretElement 
       @concretElement.style.height = @fixedHeight + 'px'
       @concretElement.panelHeight = @fixedHeight
-      @concretElement.fire GS.EVENTS.HAS_BEEN_RESIZED, null, bubbles: false
       
   get_children_tree: ->
     id: @identifier
