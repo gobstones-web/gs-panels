@@ -141,8 +141,10 @@
         return this.on_attach_once_callbacks.push(callback);
       },
       __resizer_subscribe: function(polymer_event) {
-        evnt.cancelBubble = true;
-        return this.resizer_elem = polymer_event.detail.item;
+        polymer_event.cancelBubble = true;
+        this.resizer_elem = polymer_event.detail.item;
+        console.log('register');
+        return this.__update_fixed_height();
       },
       __on_begin_resize: function(evnt) {
         var context, mousemove, mouseup;
